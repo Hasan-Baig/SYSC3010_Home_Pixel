@@ -2,6 +2,7 @@
 #     The file to be jointly edited by Team Members C and D
 
 from C import *
+from D import *
 
 def function_CD():
     function_C()
