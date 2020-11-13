@@ -7,7 +7,7 @@ TODO: TEST
 """
 
 import logging
-from gpiozero import MotionSensor as motion
+import RPi.GPIO as GPIO
 from time import sleep
 from datetime import datetime
 
@@ -18,14 +18,16 @@ class MotionSensor:
 
     def __init__(self, pin=MOTION_INPUT): 
         self.__pin = pin
-        motion = MotionSensor(self.__pin)
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setwarnings(False)
+        GPIO.setup(self.__pin, GPIO.IN)
 
     def check_input(self):
-        if motion.wait_for_motion():
+        movement = False 
+        if GPIO.input(self.__pin):
             datetime = datetime.now()
             #timestamp = "{0:%H}:{0:%M}:{0:%S}"
             #datestamp = "{0:%Y}-{0:%m}-{0:%d}"
-            logging.debug("Motion Detected!")
             logging.debug("Motion Detected!")
             movement = True 
         return movement, datetime #datestamp, timestamp 
@@ -42,7 +44,7 @@ def motionsensor_test():
     except BaseException:
         logging.error('An error or exception occurred!')
     finally:
-        motion.close()
+        GPIO.cleanup()
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
