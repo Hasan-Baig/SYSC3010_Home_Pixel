@@ -40,7 +40,6 @@ class ThingSpeakWriter():
         logging.debug('({0}, {1})'.format(status, reason))
         return status, reason
 
-
 def write_test():
     """
     Creates a ThingSpeakWriter object for manual verification
@@ -59,8 +58,6 @@ def write_test():
         HEADER=2)
     
     logging.debug('Check results here: {}'.format(read_url))
-
-
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',

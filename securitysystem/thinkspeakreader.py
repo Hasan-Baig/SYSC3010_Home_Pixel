@@ -9,7 +9,6 @@ from constants import (L2_M_5A2_READ_KEY,
                        L2_M_5A2_FEED,
                        READ_URL)
 
-
 class ThingSpeakReader():
 
     def __init__(self, key, feed):
@@ -24,7 +23,6 @@ class ThingSpeakReader():
         fields = requests.get(read_url).json()
         return fields
 
-
 def read_test():
     reader = ThingSpeakReader(L2_M_5A2_READ_KEY, L2_M_5A2_FEED)
     jsonData = reader.read_from_channel()
@@ -37,7 +35,6 @@ def read_test():
         values.append(x['field1'])
     
     logging.debug('The last 2 results are: {}'.format(values))
-
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',

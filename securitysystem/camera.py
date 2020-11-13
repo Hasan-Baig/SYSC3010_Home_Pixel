@@ -3,6 +3,7 @@
 """
 Purpose:
 Performs actions on camera module (actuator)
+TODO: TEST
 """
 
 import logging
