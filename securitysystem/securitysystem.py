@@ -7,9 +7,15 @@ import time
 from camera import Camera
 from motionsensorclass import MotionSensorClass
 from thinkspeakwriter import ThingSpeakWriter
-from constants import L2_M_5A1_WRITE_KEY, GOOD_STATUS
+import nexmo
 import argparse
 import logging
+from constants import (L2_M_5A1_WRITE_KEY, 
+                       GOOD_STATUS,
+                       SMS_API_KEY, 
+                       SMS_API_SECRET,
+                       FROM_NUMBER,
+                       TO_NUMBER)
 
 POLL_TIME_SECS = 0.5 
 
@@ -44,7 +50,7 @@ class SecuritySystem:
 
                 if motionDetected[0]:
                     self.__write_to_channel(motionDetected[1], motionDetected[2])
-                    # self.__send_notification(motionDetected[1], motionDetected[2])
+                    self.__send_notification(motionDetected[1], motionDetected[2])
                     # self.__upload_video()
                     # self.__email_link()
 
@@ -87,10 +93,22 @@ class SecuritySystem:
         """
         Send notification via SMS to mobile phone
         """
-        # fields = {'field1': "{} {}".format(date, time)}
-        # status, reason = self.__writer.write_to_channel(fields)
-        # if status != GOOD_STATUS:
-        #     raise Exception('Write was unsuccessful')
+        try:
+            client = nexmo.Client(key=SMS_API_KEY, secret=SMS_API_SECRET)
+
+            responseData = client.send_message({
+                'from': FROM_NUMBER,
+                'to': TO_NUMBER,
+                'text': 'Motion Detected at {} {}\n'.format(date, time),
+            })
+
+            if responseData["messages"][0]["status"] == "0":
+                logging.debug("Message sent successfully.")
+            else:
+                logging.debug("Message failed with error: {}".format(responseData['messages'][0]['error-text']))
+
+        except BaseException as e:
+            print('An error or exception occurred: ' + str(e))
 
     def __upload_video(self):
         """

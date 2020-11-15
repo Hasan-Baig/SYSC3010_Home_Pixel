@@ -16,5 +16,11 @@ READ_URL = 'https://api.thingspeak.com/channels/' + \
            '{CHANNEL_FEED}/fields/1.json?api_key=' + \
            '{READ_KEY}&results={HEADER}'
 
+# SMS API using Nexmo
+SMS_API_KEY = '2d73a813'
+SMS_API_SECRET = 'FdjEZXyRZAG4gHao'
+FROM_NUMBER = '12264088542'
+TO_NUMBER = '16139839862'          
+
 # Other constants
 GOOD_STATUS = 200
