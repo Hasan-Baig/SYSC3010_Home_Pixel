@@ -8,6 +8,7 @@ from camera import Camera
 from motionsensorclass import MotionSensorClass
 from thinkspeakwriter import ThingSpeakWriter
 import nexmo
+import smtplib
 import argparse
 import logging
 from constants import (L2_M_5A1_WRITE_KEY, 
@@ -15,7 +16,11 @@ from constants import (L2_M_5A1_WRITE_KEY,
                        SMS_API_KEY, 
                        SMS_API_SECRET,
                        FROM_NUMBER,
-                       TO_NUMBER)
+                       TO_NUMBER,
+                       SMTP_SERVER,
+                       SMTP_PORT,
+                       GMAIL_USERNAME,
+                       GMAIL_PASSWORD)
 
 POLL_TIME_SECS = 0.5 
 
@@ -51,8 +56,8 @@ class SecuritySystem:
                 if motionDetected[0]:
                     self.__write_to_channel(motionDetected[1], motionDetected[2])
                     self.__send_notification(motionDetected[1], motionDetected[2])
-                    # self.__upload_video()
-                    # self.__email_link()
+                    # self.__upload_video(motionDetected[1], motionDetected[2])
+                    self.__email_link(motionDetected[1], motionDetected[2], "google.com")
 
                 # Wait before polling again
                 sleep_time = POLL_TIME_SECS if motionDetected[0] else 0
@@ -65,6 +70,7 @@ class SecuritySystem:
         finally:
             self.__cam.close_camera()
             self.__mts.close_sensor()
+            # self.__delete_local_videos()
 
     def update_status(self):
         """
@@ -110,7 +116,7 @@ class SecuritySystem:
         except BaseException as e:
             print('An error or exception occurred: ' + str(e))
 
-    def __upload_video(self):
+    def __upload_video(self, date, time):
         """
         Upload video to Google Drive
         """
@@ -119,9 +125,40 @@ class SecuritySystem:
         # if status != GOOD_STATUS:
         #     raise Exception('Write was unsuccessful')
 
-    def __email_link(self):
+    def __email_link(self, date, time, link):
         """
         Email link to gmail of Google Drive access link 
+        """
+        try:
+            #Create Headers
+            headers = ["From: " + GMAIL_USERNAME, 
+                    "Subject: Video for Motion Detected at {} {}".format(date, time), 
+                    "To: " + GMAIL_USERNAME,
+                    "MIME-Version: 1.0", 
+                    "Content-Type: text/html"]
+            headers = "\r\n".join(headers)
+    
+            #Connect to Gmail Server
+            session = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+            session.ehlo()
+            session.starttls()
+            session.ehlo()
+    
+            #Login to Gmail
+            session.login(GMAIL_USERNAME, GMAIL_PASSWORD)
+    
+            #Send Email & Exit
+            session.sendmail(GMAIL_USERNAME, GMAIL_USERNAME, headers + "\r\n\r\n" + link)
+            session.quit
+
+            logging.debug("Email sent successfully!")
+        
+        except BaseException as e:
+            print('An error or exception occurred: ' + str(e))
+
+    def __delete_local_videos(self):
+        """
+        Deletes all videos stored locally 
         """
         # fields = {'field1': "{} {}".format(date, time)}
         # status, reason = self.__writer.write_to_channel(fields)

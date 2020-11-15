@@ -22,5 +22,12 @@ SMS_API_SECRET = 'FdjEZXyRZAG4gHao'
 FROM_NUMBER = '12264088542'
 TO_NUMBER = '16139839862'          
 
+# Google Email for link
+SMTP_SERVER = 'smtp.gmail.com'
+SMTP_PORT = 587 
+GMAIL_USERNAME = 'sysc3010homepixel@gmail.com' 
+GMAIL_PASSWORD = 'homepixel3010'
+
+
 # Other constants
 GOOD_STATUS = 200
