@@ -5,13 +5,14 @@ Purpose - Making sure temperature sensor is working
 
 import RPi.GPIO as GPIO
 import logging
+import smbus2
+import bme280
 from time import sleep
 from datetime import datetime
 
-import bme280
-import smbus2
 address = 0x77
 bus = smbus2.SMBus(1)
+
 calibration_params = bme280.load_calibration_params(bus, address)
 data = bme280.sample(bus, address, calibration_params)
 
@@ -26,13 +27,11 @@ class Temperature:
 		GPIO.setup(self.__pin, GPIO.IN)
 
 	def check_input(self):
-		temp = False
+		tempval = 0
 		if GPIO.input(self.__pin):
 			logging.debug("Temp Detected")
 			tempval = data.temperature
-			print (tempval)
-			temp = True
-		return temp
+		return tempval
 
 def temperature_test():
 	try:
@@ -50,5 +49,5 @@ def temperature_test():
 if __name__ == "__main__":
 	logging.basicConfig(format = "%(asctime)s - %(levelname)s - %(message)s",
 		level = logging.DEBUG)
-temperature_test()
+#temperature_test()
 
