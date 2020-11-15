@@ -12,6 +12,9 @@ WRITE_KEY_D2 = "UCIILDDZUN1STTZ7"
 READ_KEY_D2 = "7NNEIYEELFKI1DDX"
 FEED_D2 = "1227948"
 
+#URL Syntax for TempSensor
 READ_URL = "https://api.thingspeak.com/channels/" + \
 	   "{CHANNEL_FEED}/fields/1.json?api_key=" + \
 	   "{READ_KEY}&results={HEADER}"
+
+GOOD_STATUS = 200

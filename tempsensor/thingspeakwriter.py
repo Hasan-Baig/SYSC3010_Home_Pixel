@@ -4,7 +4,6 @@ import http.client
 import urllib
 import logging
 from datetime import datetime
-
 from thingspeakinfo import (WRITE_KEY_D2, READ_KEY_D2, FEED_D2, READ_URL)
 
 class ThingSpeakWriter():
