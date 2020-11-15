@@ -2,7 +2,8 @@
 """
 Writing data collected from motion sensor to ThinkSpeak
 """
-import http.client
+# import http.client    #used in desktop (python3)
+import httplib          #used in RPI (python2)
 import urllib
 import logging
 from datetime import datetime
@@ -16,17 +17,20 @@ class ThingSpeakWriter():
     def __init__(self, key):
         self.__key = key
 
-    def write_to_channel(self, fields):
+    def write(self, fields):
         fields['key'] = self.__key
         status = None
         reason = None
-        params = urllib.parse.urlencode(fields)
+        # params = urllib.parse.urlencode(fields)   #used in desktop (python3)
+        params = urllib.urlencode(fields)           #used in RPI (python2)
 
         logging.debug('Fields: {}'.format(fields))
 
         headers = {'Content-typZZe': 'application/x-www-form-urlencoded',
                    'Accept': 'text/plain'}
-        conn = http.client.HTTPConnection('api.thingspeak.com:80')
+                   
+        # conn = http.client.HTTPConnection('api.thingspeak.com:80')    #used in desktop (python3)
+        conn = httplib.HTTPConnection('api.thingspeak.com:80')   #used in RPI (python2)
 
         try:
             conn.request('POST', '/update', params, headers)
@@ -50,7 +54,7 @@ def write_test():
     fields = {'field1': test_data}
 
     logging.debug('Writing {} to field1'.format(test_data))
-    writer.write_to_channel(fields)
+    writer.write(fields)
 
     read_url = READ_URL.format(
         CHANNEL_FEED=L2_M_5A2_FEED,
