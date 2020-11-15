@@ -20,7 +20,7 @@ def read_test():
 	fields = reader.read_from_channel()
 	logging.debug(fields)
 	read_url = READ_URL.format(CHANNEL_FEED = FEED_D2, READ_KEY = READ_KEY_D2, HEADER = 2)
-	logging.debug("Check Results --> {}".format(read_url)
+	logging.debug("Check Results --> {}".format(read_url))
 
 if __name__ == "__main__":
 	logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level = logging.DEBUG)

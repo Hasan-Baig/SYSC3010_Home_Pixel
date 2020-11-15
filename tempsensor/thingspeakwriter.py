@@ -3,7 +3,7 @@
 import http.client
 import urllib
 import logging
-import time
+from datetime import datetime
 
 from thingspeakinfo import (WRITE_KEY_D2, READ_KEY_D2, FEED_D2, READ_URL)
 
@@ -37,10 +37,10 @@ class ThingSpeakWriter():
 def write_test():
 	writer = ThingSpeakWriter(WRITE_KEY_D2)
 	test_data = datetime.now()
-	fields - {"field1" : test_data}
+	fields = {"field1" : test_data}
 
 	logging.debug("Writing {} to field1".format(test_data))
-	writer.write_to_channel(fields)
+	writer.write(fields)
 
 	read_url = READ_URL.format(CHANNEL_FEED = FEED_D2, READ_KEY = READ_KEY_D2, HEADER = 2)
 	logging.debug("Check results here --> {}".format(read_url))
