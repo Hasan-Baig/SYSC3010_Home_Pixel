@@ -3,46 +3,47 @@
 """
 Purpose:
 Record motion detected by PIR sensor
-TODO: TEST
 """
 
 import logging
-from gpiozero import MotionSensor as motion
+from gpiozero import MotionSensor
 from time import sleep
 from datetime import datetime
 
 MOTION_INPUT = 23
 MOTION_POLL_TIME_SECS = 3.5
 
-class MotionSensor:
+class MotionSensorClass:
 
-    def __init__(self, pin=MOTION_INPUT): 
-        self.__pin = pin
-        motion = MotionSensor(self.__pin)
+    def __init__(self, mts=MotionSensor(MOTION_INPUT)): 
+        self.__mts = mts
 
     def check_input(self):
-        if motion.wait_for_motion():
-            datetime = datetime.now()
-            #timestamp = "{0:%H}:{0:%M}:{0:%S}"
-            #datestamp = "{0:%Y}-{0:%m}-{0:%d}"
-            logging.debug("Motion Detected!")
-            logging.debug("Motion Detected!")
+        dateNow = "none"
+        timeNow = "none"
+        if self.__mts.wait_for_motion():
+            dateNow = datetime.now().strftime("%Y-%m-%d")
+            timeNow = datetime.now().strftime("%H:%M:%S")
+            logging.debug("Motion Detected at {}".format(timeNow))
             movement = True 
-        return movement, datetime #datestamp, timestamp 
+        return movement, dateNow, timeNow 
+
+    def close_sensor(self):
+        self.__mts.close()
 
 def motionsensor_test():
     try:
-        mts = MotionSensor()
+        mts = MotionSensorClass()
         while True:
             result = mts.check_input()
             if(result[0]):
                 sleep(MOTION_POLL_TIME_SECS)
     except KeyboardInterrupt:
         logging.info('Exiting')
-    except BaseException:
-        logging.error('An error or exception occurred!')
+    except BaseException as e:
+        logging.error('An error or exception occurred: ' + str(e))
     finally:
-        motion.close()
+        mts.close()
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
