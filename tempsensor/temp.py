@@ -15,10 +15,10 @@ bus = smbus2.SMBus(1)
 calibration_params = bme280.load_calibration_params(bus, address)
 data = bme280.sample(bus, address, calibration_params)
 
-TEMP_PIN = 2
-TEMP_POLL_TIME = 3
+TEMP_PIN = 3
+TEMP_POLL_TIME = 1
 
-class Temperature():
+class Temperature:
 	def __init__(self, pin = TEMP_PIN):
 		self.__pin = pin
 		GPIO.setmode(GPIO.BCM)
@@ -29,7 +29,8 @@ class Temperature():
 		temp = False
 		if GPIO.input(self.__pin):
 			logging.debug("Temp Detected")
-			print (data.temperature)
+			tempval = data.temperature
+			print (tempval)
 			temp = True
 		return temp
 

@@ -8,7 +8,7 @@ from time import sleep
 import logging
 
 FAN_PIN = 23
-FAN_TIME = 10
+FAN_TIME = 5
 
 class Fan:
 	def __init__(self, pin = FAN_PIN):
@@ -30,11 +30,35 @@ class Fan:
 
 		self.__fan_on = status
 
+	def hot_status(self, status):
+		output_gpio = GPIO.HIGH if status else GPIO.LOW
+		GPIO.output(self.__pin, output_gpio)
+
+		output_string = "ROOM TOO HOT - ON"
+		logging.debug("FAN: {}".format(output_string))
+		self.__fan_on = status
+
+	def cold_status(self, status):
+		output_gpio = GPIO.LOW if status else GPIO.HIGH
+		GPIO.output(self.__pin, output_gpio)
+
+		output_string = "ROOM TOO COLD - OFF"
+		logging.debug("FAN: {}".format(output_string))
+		self.__fan_on = status
+
 def fan_test():
 	fan = Fan()
 	fan.set_status(True)
 	sleep(FAN_TIME)
+
 	fan.set_status(False)
+	sleep(FAN_TIME)
+
+	fan.hot_status(True)
+	sleep(FAN_TIME)
+
+	fan.cold_status(True)
+	sleep(FAN_TIME)
 	GPIO.cleanup()
 
 if __name__ == "__main__":
