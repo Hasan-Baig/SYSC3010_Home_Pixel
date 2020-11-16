@@ -7,7 +7,7 @@ from thingspeakinfo import WRITE_KEY_D1, GOOD_STATUS
 import argparse
 import logging
 
-POLL_TIME_SEC = 0.5
+POLL_TIME_SEC = 10
 THRESHOLD = 10
 
 class TempSensor:
@@ -19,7 +19,7 @@ class TempSensor:
 	def poll(self):
 		try:
 			while True:
-				print ("POLLING")
+#				print ("POLLING")
 				tempDetected = self.update_status()
 				if tempDetected > THRESHOLD:
 					self.__write_to_channel(tempDetected)
@@ -37,13 +37,13 @@ class TempSensor:
 
 	def update_status(self):
 		checkingtemp = self.__temp.check_input()
-		print ("Entered update status")
-		print (str(checkingtemp) + "First")
+#		print ("Entered update status")
+#		print (str(checkingtemp) + "First")
 		if checkingtemp > THRESHOLD:
-			print ("TURNING ON")
+			print ("ROOM TOO HOT - TURNING ON")
 			self.__fan.hot_status(True)
 		if checkingtemp <= THRESHOLD:
-			print ("TURNING OFF")
+			print ("ROOM TOO COLD - TURNING OFF")
 			self.__fan.cold_status(True)
 		return checkingtemp
 

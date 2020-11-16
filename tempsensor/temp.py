@@ -27,10 +27,12 @@ class Temperature:
 		GPIO.setup(self.__pin, GPIO.IN)
 
 	def check_input(self):
+#		data = bme280.sample(bus, address, calibration_params)
 		tempval = 0
 		if GPIO.input(self.__pin):
 			logging.debug("Temp Detected")
 			tempval = data.temperature
+			print (tempval)
 		return tempval
 
 def temperature_test():
