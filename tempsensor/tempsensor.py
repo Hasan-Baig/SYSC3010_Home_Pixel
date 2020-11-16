@@ -8,6 +8,7 @@ import argparse
 import logging
 
 POLL_TIME_SEC = 10
+#THRESHOLD = 30
 THRESHOLD = 10
 
 class TempSensor:
@@ -22,6 +23,8 @@ class TempSensor:
 #				print ("POLLING")
 				tempDetected = self.update_status()
 				if tempDetected > THRESHOLD:
+					self.__write_to_channel(tempDetected)
+				if tempDetected <= THRESHOLD:
 					self.__write_to_channel(tempDetected)
 
 				sleep_time = POLL_TIME_SEC if tempDetected else 0

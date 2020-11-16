@@ -2,65 +2,6 @@
 """
 Purpose - Performs actions for the fan module
 """
-"""
-import RPi.GPIO as GPIO
-from time import sleep
-import logging
-
-FAN_PIN = 23
-FAN_TIME = 5
-
-class Fan:
-	def __init__(self, pin = FAN_PIN):
-		self.__pin = pin
-		self.__fan_on = False
-		GPIO.setmode(GPIO.BCM)
-		GPIO.setwarnings(False)
-		GPIO.setup(self.__pin, GPIO.OUT)
-
-	def get_status(self):
-		return self.__fan_on
-
-	def set_status(self, status):
-		output_gpio = GPIO.HIGH if status else GPIO.LOW
-		GPIO.output(self.__pin, output_gpio)
-
-		output_string = "ON" if status else "OFF"
-		logging.debug("FAN: {}".format(output_string))
-
-		self.__fan_on = status
-
-	def hot_status(self, status):
-		output_gpio = GPIO.HIGH if status else GPIO.LOW
-		GPIO.output(self.__pin, output_gpio)
-
-		output_string = "ROOM TOO HOT - ON"
-		logging.debug("FAN: {}".format(output_string))
-		self.__fan_on = status
-
-	def cold_status(self, status):
-		output_gpio = GPIO.LOW if status else GPIO.HIGH
-		GPIO.output(self.__pin, output_gpio)
-
-		output_string = "ROOM TOO COLD - OFF"
-		logging.debug("FAN: {}".format(output_string))
-		self.__fan_on = status
-
-def fan_test():
-	fan = Fan()
-	fan.set_status(True)
-	sleep(FAN_TIME)
-
-	fan.set_status(False)
-	sleep(FAN_TIME)
-
-	fan.hot_status(True)
-	sleep(FAN_TIME)
-
-	fan.cold_status(True)
-	sleep(FAN_TIME)
-	GPIO.cleanup()
-"""
 import logging
 import RPi.GPIO as GPIO
 from time import sleep
@@ -100,6 +41,7 @@ class Fan:
 
 		output_string = "ROOM TOO COLD - OFF"
 		logging.debug("FAN: {}".format(output_string))
+		status = 0
 		self.__fan_on = status
 
 def fan_test():
