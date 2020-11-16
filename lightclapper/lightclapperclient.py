@@ -7,9 +7,7 @@ import re
 from sqliteDB import LightDB
 from thingspeakreader import ThingSpeakReader
 from constants import (L2_M_5C1_READ_KEY,
-                       L2_M_5C2_READ_KEY,
-                       L2_M_5C1_FEED,
-                       L2_M_5C2_FEED)
+                       L2_M_5C1_FEED)
 
 POLL_TIME_SECS = 5   # TODO: check this time
 HEADER = 1
@@ -123,8 +121,8 @@ def light_clapper_client_test():
     Creates a LightClapperClient object for manual verification
     """
     light_clapper_client = LightClapperClient(
-        key=L2_M_5C2_READ_KEY,
-        feed=L2_M_5C2_FEED)
+        key=L2_M_5C1_READ_KEY,
+        feed=L2_M_5C1_FEED)
     light_clapper_client.poll_channel()
 
 
