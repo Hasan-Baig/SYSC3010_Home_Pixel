@@ -5,14 +5,14 @@ from tempDB import TempDB
 from thingspeakreader import ThingSpeakReader
 from thingspeakinfo import (READ_KEY_D1, READ_KEY_D2, FEED_D1, FEED_D2)
 
-POLL_TIME_SECS = 5
+POLL_TIME_SECS = 10
 HEADER = 1
 
 class TempSensorClient:
 	def __init__(self, key, feed):
-		self._reader = ThingSpeakReader(key, feed)
+		self.__reader = ThingSpeakReader(key, feed)
 
-		with TempDB(db_file = 'tempsensor.db', name = 'TempSensor') as obj:
+		with TempDB(db_file = 'tempsensor.db', name = 'TempSensor') as db_obj:
 			if not db_obj.table_exists():
 				db_obj.create_table()
 
@@ -25,8 +25,8 @@ class TempSensorClient:
 			time.sleep(POLL_TIME_SECS)
 		except KeyboardInterrupt:
 			print ("Exiting")
-		except BaseException:
-			print ("An error or exception occurred!")
+		except BaseException as e:
+			print ("An error or exception occurred: " + str(e))
 
 	def read_from_channel(self):
 		read_data = self.__reader.read_from_channel(HEADER)
@@ -35,11 +35,11 @@ class TempSensorClient:
 		parsed_data = []
 		data = {'date': '',
 			'time': '',
-			'tempStatus': ''}
+			'fanStatus': ''}
 
 		for f in feeds:
 			date_data = f.get('created_at', '')
-			data_list = re.split('T|Z', date_data)
+			date_list = re.split('T|Z', date_data)
 
 			if len(date_list) < 2:
 				return None
@@ -53,14 +53,14 @@ class TempSensorClient:
 
 		return parsed_data
 
-def __add_data_from_channel(self, channel_data):
-	with TempDB(db_file = 'tempsensor.db', name = 'TempSensor') as db_obj:
-		for data in channel_data:
-			if not db_obj.record_exists(data):
-				db_obj.add_record(data)
+	def __add_data_from_channel(self, channel_data):
+		with TempDB(db_file = 'tempsensor.db', name = 'TempSensor') as db_obj:
+			for data in channel_data:
+				if not db_obj.record_exists(data):
+					db_obj.add_record(data)
 
 def temp_sensor_client_test():
-	temp_sensor_client = TempSensorClient(READ_KEY_D2, FEED_D2)
+	temp_sensor_client = TempSensorClient(READ_KEY_D1, FEED_D1)
 	temp_sensor_client.poll_channel()
 
 if __name__ == "__main__":

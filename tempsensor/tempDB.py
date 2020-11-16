@@ -1,11 +1,12 @@
 import abc
 import sqlite3
 import logging
+from datetime import datetime
 
 TEMP_SENSOR_DB = "tempsensor.db"
 TEMP_SENSOR_NAME = "TempSensor"
 
-class SqliteDB(metaclass = abc.ABCMeta):
+class SqliteDB(metaclass=abc.ABCMeta):
 	def __init__(self, db_file, name):
 		self._db_file = db_file
 		self._name = name
@@ -46,7 +47,7 @@ class SqliteDB(metaclass = abc.ABCMeta):
 		pass
 
 	@abc.abstractmethod
-	def record_exits(self, record):
+	def record_exists(self, record):
 		pass
 
 	@abc.abstractmethod
@@ -64,48 +65,47 @@ class TempDB(SqliteDB):
 	            raise Exception('Invalid call to Context Manager method!')
 		self._cursor.execute("Create Table {} (date text, time text, fanStatus integer)".format(self._name))
 
-    	def add_record(self, record)
-        	logging.debug('Adding new entry to table')
-        	if not self._dbconnect or not self._cursor:
-            	raise Exception('Invalid call to Context Manager method!')
+	def add_record(self, record):
+		logging.debug('Adding new entry to table')
+		if not self._dbconnect or not self._cursor:
+			raise Exception('Invalid call to context Manager method!')
 
-        	self._cursor.execute("insert into {} values(?, ?, ?)".format(
-            	self._name),
-            	(record['date'], record['time'], record['fanStatus']))
+		self._cursor.execute("Insert into {} values(?, ?, ?)".format(
+		     self._name),
+		     (record['date'], record['time'], record['fanStatus']))
 
 	def record_exists(self, record):
-        	logging.debug('Check if record exists in table')
-        	if not self._dbconnect or not self._cursor:
-            	raise Exception('Invalid call to Context Manager method!')
+		logging.debug('Check if record exists in table')
+		if not self._dbconnect or not self._cursor:
+			raise Exception('Invalid call to Context Manager method!')
 
-        	date = record['date']
-        	time = record['time']
-        	fan_status = record['fanStatus']
+		date = record['date']
+		time = record['time']
+		fan_status = record['fanStatus']
 
-        	self._cursor.execute("""SELECT count(*) FROM {} WHERE \
-             	date == ? and time = ? and fanStatus = ?""".format(self._name),
-                             	(date, time, fan_status))
+		self._cursor.execute("""SELECT count(*) FROM {} WHERE \
+	             date == ? and time = ? and fanStatus = ?""".format(self._name), (date, time, fan_status))
 
-        	record_exists = True if self._cursor.fetchone()[0] == 1 else False
+		record_exists = True if self._cursor.fetchone()[0] == 1 else False
 
-        	logging.debug('Record exists? : {}'.format(record_exists))
-        	return record_exists
+		logging.debug('Record exists : {}'.format(record_exists))
+		return record_exists
 
 	def get_records(self):
 		logging.debug("Return all records in table")
-		if not self._dbconnect or not self._cursur:
+		if not self._dbconnect or not self._cursor:
 			raise Exception("Invalid call to Context Manager method!")
 
 		self._cursor.execute("""SELECT * FROM {}""".format(self._name))
 
 		for row in self._cursor:
-			print(row['date'], row['time'], row['fan_status'])
+			print(row['date'], row['time'], row['fanStatus'])
 
 def temp_sensor_db_test():
-	with TempDB(db_file = "test.db", name = "test") as db_obj:
-		record = {"date": "fake_date",
-			  "time": "fake_time",
-			  "fanStatus": 1}
+	with TempDB(db_file='test.db', name='test') as db_obj:
+		record = {'date': 'fake_date',
+			  'time': 'fake_time',
+			  'fanStatus': 1}
 
 		if not db_obj.table_exists():
 			db_obj.create_table()
