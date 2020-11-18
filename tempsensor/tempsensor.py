@@ -8,8 +8,8 @@ import argparse
 import logging
 
 POLL_TIME_SEC = 10
-#THRESHOLD = 30
-THRESHOLD = 10
+THRESHOLD = 25
+#THRESHOLD = 10
 
 class TempSensor:
 	def __init__(self, temp=Temperature(), fan=Fan(), writer = ThingSpeakWriter(WRITE_KEY_D1)):
@@ -20,7 +20,6 @@ class TempSensor:
 	def poll(self):
 		try:
 			while True:
-#				print ("POLLING")
 				tempDetected = self.update_status()
 				if tempDetected > THRESHOLD:
 					self.__write_to_channel(tempDetected)
@@ -39,9 +38,8 @@ class TempSensor:
 			GPIO.cleanup()
 
 	def update_status(self):
-		checkingtemp = self.__temp.check_input()
-#		print ("Entered update status")
-#		print (str(checkingtemp) + "First")
+		checkingtemp = self.__temp.read_data()
+		print ("Temperature Value: " + str(checkingtemp))
 		if checkingtemp > THRESHOLD:
 			print ("ROOM TOO HOT - TURNING ON")
 			self.__fan.hot_status(True)
