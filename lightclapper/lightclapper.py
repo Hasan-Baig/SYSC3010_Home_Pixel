@@ -1,25 +1,41 @@
 #!/usr/bin/env python3
 """
-light_clapper.py
+lightclapper.py
+
+Notes
+-----
+- Docstrings follow the numpydoc style:
+  https://numpydoc.readthedocs.io/en/latest/format.html
+- Code follows the PEP 8 style guide:
+  https://www.python.org/dev/peps/pep-0008/
 """
 import RPi.GPIO as GPIO
-import time
+import argparse
+import logging
+from time import sleep
 from led import Led
 from mic import Microphone
 from thingspeakwriter import ThingSpeakWriter
-from constants import L2_M_5C1_WRITE_KEY, GOOD_STATUS
-import argparse
-import logging
+import constants as c
 
+DEFAULT_ID = 0
+ID_INCREMENT = 1
+ZERO_SECS = 0
 POLL_TIME_SECS = 0.5
+ON_INT = 1
+OFF_INT = 0
 
 
 class LightClapper:
     """
-    Turns on/off light when a clap is detected
+    Turns on/off light when a clap sound is detected
 
     Attributes
     ----------
+    __location : str
+        Location of LightClapper node
+    __node_id : str
+        Unique ID of LightClapper on node
     __mic : Microphone
         The microphone sensor
     __led : Led
@@ -27,25 +43,28 @@ class LightClapper:
     __write_mode : bool
         True if write to ThingSpeak channel
     __writer : ThingSpeakWriter
-        Writer to write to ThingSpeak channel
+        Writer to write to ThingSpeak channel if __write_mode True
 
     Methods
     -------
     poll()
         Polls to inverts the light status based on mic input
     check_and_update_status()
-        Inverts the light status based on mic
+        Inverts the light status based on mic input
     __write_status_to_channel()
         Writes information to ThingSpeak channel
     """
+    light_clapper_id = DEFAULT_ID   # Static ID of LightClapper unit
 
-    def __init__(self, mic=Microphone(), led=Led(),
-                 write=False, write_key=L2_M_5C1_WRITE_KEY):
+    def __init__(self, location, mic=Microphone(), led=Led(),
+                 write=False, write_key=c.L2_M_5C1_WRITE_KEY):
         """
         Initializes the attributes
 
         Parameters
         ----------
+        location : str
+            location of LightClapper
         mic : Microphone
             The microphone sensor
         led : Led
@@ -55,70 +74,85 @@ class LightClapper:
         write_key : str
             Optional key if writing to ThingSpeak channel
         """
+        LightClapper.light_clapper_id += ID_INCREMENT
+        self.__node_id = '{node_name}_{id}'.format(
+            node_name=c.LIGHT_CLAPPER_NAME,
+            id=LightClapper.light_clapper_id)
+
+        self.__location = location
         self.__mic = mic
         self.__led = led
-        self.__writer = None
 
         self.__write_mode = write
-        if self.__write_mode:
-            self.__writer = ThingSpeakWriter(write_key)
+        self.__writer = ThingSpeakWriter(write_key) if write else None
 
     def poll(self):
         """
-        Poll for microphone sensor claps
+        Poll for microphone sensor claps.
+        Update LED based on mic input.
+        Write update to ThingSpeak channel.
         """
         try:
-            while True:
-                toggle = self.check_and_update_status()
+            while c.POLLING:
+                toggled = self.check_and_update_status()
 
-                if toggle and self.__write_mode:
+                if toggled and self.__write_mode:
                     self.__write_status_to_channel()
 
                 # If light status changed, wait before polling again
-                sleep_time = POLL_TIME_SECS if toggle else 0
-                time.sleep(sleep_time)
+                sleep_time = POLL_TIME_SECS if toggled else ZERO_SECS
+                sleep(sleep_time)
 
         except KeyboardInterrupt:
-            print('Exiting')
+            logging.info('Exiting due to keyboard interrupt')
+
         except BaseException:
-            print('An error or exception occurred!')
+            logging.error('An error or exception occurred!')
+
         finally:
-            self.__led.set_status(False)
+            # Attempt to reset LED status and cleanup GPIO
+            if self.__led.get_status() == c.ON_STATUS:
+                self.__led.invert_status()
+                if self.__write_mode:
+                    self.__write_status_to_channel()
             GPIO.cleanup()
-            if self.__write_mode:
-                self.__write_status_to_channel()
 
     def check_and_update_status(self):
         """
         Check microphone sensor for a clap
-        and set light status if required
+        and invert light status if clap detected
 
         Returns
         -------
-        toggle : bool
+        toggled : bool
             True if light status was toggled
         """
-        toggle = False
-        if self.__mic.check_input():
+        toggled = False
+        if self.__mic.check_input() == c.SOUND_DETECTED:
             self.__led.invert_status()
-            toggle = True
-
-        return toggle
+            toggled = True
+        return toggled
 
     def __write_status_to_channel(self):
         """
         Write status of light clapper to channel
         """
-        status = 1 if self.__led.get_status() else 0
-        fields = {'field1': status}
+        led_status = OFF_INT
+        if self.__led.get_status() == c.ON_STATUS:
+            led_status = ON_INT
+
+        fields = {c.LOCATION_FIELD: self.__location,
+                  c.NODE_ID_FIELD: self.__node_id,
+                  c.LIGHT_STATUS_FIELD: led_status}
+
         status, reason = self.__writer.write_to_channel(fields)
-        if status != GOOD_STATUS:
-            raise Exception('Write was unsuccessful')
+        if status != c.GOOD_STATUS:
+            logging.error('Write to ThingSpeak channel was unsuccessful')
 
 
 def parse_args():
     """
-    Parses arguments for manual testing of LightClapper
+    Parses arguments for manual operation of the LightClapper
 
     Returns
     -------
@@ -127,17 +161,25 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(
         description='Run the LightClapper program (CTRL-C to exit)')
+
     parser.add_argument('-w',
                         '--write',
                         default=False,
                         action='store_true',
-                        help='Write data to channel')
+                        help='Write data to ThingSpeak channel')
 
     parser.add_argument('-v',
                         '--verbose',
                         default=False,
                         action='store_true',
                         help='Print all debug logs')
+
+    parser.add_argument('-l',
+                        '--location',
+                        type=str,
+                        required=True,
+                        metavar='<owner_room>',
+                        help='Specify owner and room')
 
     args = parser.parse_args()
     return args
@@ -147,8 +189,7 @@ if __name__ == '__main__':
     args = parse_args()
 
     logging_level = logging.DEBUG if args.verbose else logging.INFO
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        level=logging_level)
+    logging.basicConfig(format=c.LOGGING_FORMAT, level=logging_level)
 
-    light_clapper = LightClapper(write=args.write)
+    light_clapper = LightClapper(args.location, write=args.write)
     light_clapper.poll()

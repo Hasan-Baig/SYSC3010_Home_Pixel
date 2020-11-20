@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """
 thingspreakwriter.py
-TODO: move to common directory later if needed
+
+Notes
+-----
+- Docstrings follow the numpydoc style:
+  https://numpydoc.readthedocs.io/en/latest/format.html
+- Code follows the PEP 8 style guide:
+  https://www.python.org/dev/peps/pep-0008/
 """
 import http.client
 import urllib
+import random
+import argparse
 import logging
-from datetime import datetime
-from constants import (L2_M_5C2_WRITE_KEY,
-                       L2_M_5C2_READ_KEY,
-                       L2_M_5C2_FEED,
-                       READ_URL)
+import constants as c
 
 
 class ThingSpeakWriter():
@@ -24,7 +28,7 @@ class ThingSpeakWriter():
 
     Methods
     -------
-    write_to_channel()
+    write_to_channel(fields)
         Writes data to ThingSpeak channel
     """
 
@@ -46,7 +50,7 @@ class ThingSpeakWriter():
         Parameters
         ----------
         fields : dict
-            field to write to ThingSpeak channel
+            fields to write to ThingSpeak channel
 
         Returns
         -------
@@ -60,7 +64,7 @@ class ThingSpeakWriter():
         reason = None
         params = urllib.parse.urlencode(fields)
 
-        logging.debug('Fields: {}'.format(fields))
+        logging.debug('Fields to write: {}'.format(fields))
 
         headers = {'Content-typZZe': 'application/x-www-form-urlencoded',
                    'Accept': 'text/plain'}
@@ -72,32 +76,74 @@ class ThingSpeakWriter():
             reason = response.reason
             conn.close()
         except Exception:
-            print("Connection failed!")
+            logging.error("Connection failed!")
 
-        logging.debug('{0}, {1}'.format(status, reason))
+        logging.debug('{response_status}, {response_reason}'.format(
+            response_status=status,
+            response_reason=reason))
         return status, reason
 
 
-def write_test():
+def write_test(test_data):
     """
     Creates a ThingSpeakWriter object for manual verification
+
+    Parameters
+    ----------
+    test_data : str
+        Custom data to write to ThingSpeak channel
     """
-    writer = ThingSpeakWriter(L2_M_5C2_WRITE_KEY)
+    writer = ThingSpeakWriter(c.L2_M_5C2_WRITE_KEY)
 
-    test_data = datetime.now()
-    fields = {'field1': test_data}
+    fields = {c.TEST_FIELD: test_data}
 
-    logging.debug('Writing {} to field1'.format(test_data))
+    logging.info('Writing {data} to {field}'.format(
+        data=test_data,
+        field=c.TEST_FIELD))
     writer.write_to_channel(fields)
 
-    read_url = READ_URL.format(
-        CHANNEL_FEED=L2_M_5C2_FEED,
-        READ_KEY=L2_M_5C2_READ_KEY,
-        HEADER=2)
-    logging.debug('Check results here: {}'.format(read_url))
+    read_url = c.READ_URL.format(
+        CHANNEL_FEED=c.L2_M_5C2_FEED,
+        READ_KEY=c.L2_M_5C2_READ_KEY)
+    logging.info('Compare with results here: {}'.format(read_url))
+
+
+def parse_args():
+    """
+    Parses arguments for manual verification of the ThingSpeakWriter
+
+    Returns
+    -------
+    args : Namespace
+        Populated attributes based on args
+    """
+    random_min = 1
+    random_max = 1000000
+    default_test_data = str(random.randint(random_min, random_max))
+
+    parser = argparse.ArgumentParser(
+        description='Run the ThingSpeakWriter test program (CTRL-C to exit)')
+
+    parser.add_argument('-v',
+                        '--verbose',
+                        default=False,
+                        action='store_true',
+                        help='Print all debug logs')
+
+    parser.add_argument('-d',
+                        '--data',
+                        default=default_test_data,
+                        type=str,
+                        metavar='<custom_data>',
+                        help='Data to write to ThingSpeak channel')
+
+    args = parser.parse_args()
+    return args
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        level=logging.DEBUG)
-    write_test()
+    args = parse_args()
+
+    logging_level = logging.DEBUG if args.verbose else logging.INFO
+    logging.basicConfig(format=c.LOGGING_FORMAT, level=logging_level)
+    write_test(args.data)

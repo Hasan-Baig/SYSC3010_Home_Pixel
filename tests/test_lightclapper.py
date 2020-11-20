@@ -9,6 +9,7 @@ from unittest.mock import patch, call, MagicMock
 from lightclapper.lightclapper import LightClapper
 from lightclapper.mic import Microphone
 from lightclapper.led import Led
+import constants as c
 
 
 class TestLightClapper(TestCase):
@@ -23,24 +24,30 @@ class TestLightClapper(TestCase):
         """
         self.mic_mock = MagicMock()
         self.led_mock = MagicMock()
-        self.led_mock.__led_on = False
-        self.light_clapper = LightClapper(mic=self.mic_mock, led=self.led_mock)
+        self.led_mock.__led_on = c.LED_OFF
+        test_location = 'test_location'
+        self.light_clapper = LightClapper(test_location,
+                                          mic=self.mic_mock, led=self.led_mock)
 
     def test_check_and_update_status_true(self):
         """
         Test if microphone sensor detects sound, does
-        check_clap_set_light retrun toggle = True
+        check_clap_set_light return toggled = True
         """
-        self.mic_mock.check_input.return_value = True
-        self.assertTrue(self.light_clapper.check_and_update_status())
+        self.mic_mock.check_input.return_value = c.SOUND_DETECTED
+
+        err_msg = 'LED not toggled but sound detected'
+        self.assertTrue(self.light_clapper.check_and_update_status(), err_msg)
 
     def test_check_and_update_status_false(self):
         """
         Test if microphone sensor does not detect sound, does
-        check_clap_set_light retrun toggle = False
+        check_clap_set_light return toggled = False
         """
-        self.mic_mock.check_input.return_value = False
-        self.assertFalse(self.light_clapper.check_and_update_status())
+        self.mic_mock.check_input.return_value = c.SOUND_NOT_DETECTED
+
+        err_msg = 'LED to be toggled but no sound detected'
+        self.assertFalse(self.light_clapper.check_and_update_status(), err_msg)
 
 
 @patch('RPi.GPIO.output', autospec=True)
@@ -62,7 +69,7 @@ class TestLed(TestCase):
         """
         Teardown TestLed
         """
-        self.led.set_status(False)
+        self.led.set_status(c.LED_OFF)
         GPIO.cleanup()
 
     def test_invert_light_on_to_off(self, mock_output):
@@ -70,8 +77,9 @@ class TestLed(TestCase):
         Test that LED status changes to off if already on
         & that 2 calls were made to RPi.GPIO.output
         """
-        self.led.set_status(True)
+        self.led.set_status(c.LED_ON)
         status = self.led.invert_status()
+
         err_msg = 'LED status did not change from on to off'
         self.assertFalse(status, err_msg)
 
@@ -83,8 +91,9 @@ class TestLed(TestCase):
         Test that LED status changes to on if already off
         & that 2 calls were made to RPi.GPIO.output
         """
-        self.led.set_status(False)
+        self.led.set_status(c.LED_OFF)
         status = self.led.invert_status()
+
         err_msg = 'LED status did not change from off to on'
         self.assertTrue(status, err_msg)
 
@@ -96,7 +105,8 @@ class TestLed(TestCase):
         Test that LED status changes on
         & that 1 call was made to RPi.GPIO.output
         """
-        self.led.set_status(True)
+        self.led.set_status(c.LED_ON)
+
         err_msg = 'LED status is not on'
         self.assertTrue(self.led.get_status(), err_msg)
 
@@ -108,7 +118,8 @@ class TestLed(TestCase):
         Test that LED status changes off
         & that 1 call was made to RPi.GPIO.output
         """
-        self.led.set_status(False)
+        self.led.set_status(c.LED_OFF)
+
         err_msg = 'LED status is not off'
         self.assertFalse(self.led.get_status(), err_msg)
 
@@ -142,7 +153,8 @@ class TestMicrophone(TestCase):
         Test that check_input returns True if
         sound detected
         """
-        mock_input.return_value = True
+        mock_input.return_value = c.SOUND_DETECTED
+
         err_msg = 'Microphone detected sound not reported'
         self.assertTrue(self.mic.check_input(), err_msg)
 
@@ -151,12 +163,12 @@ class TestMicrophone(TestCase):
         Test that check_input returns False if
         sound not detected
         """
-        mock_input.return_value = False
+        mock_input.return_value = c.SOUND_NOT_DETECTED
+
         err_msg = 'Microphone reported sound not detected'
         self.assertFalse(self.mic.check_input(), err_msg)
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-        level=logging.INFO)
+    logging.basicConfig(format=c.LOGGING_FORMAT, level=c.LOGGING_TEST_LEVEL)
     main()

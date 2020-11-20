@@ -8,9 +8,7 @@ import logging
 from unittest import TestCase, main
 from thingspeakwriter import ThingSpeakWriter
 from lightclapperclient import LightClapperClient
-from constants import (L2_M_5C2_WRITE_KEY,
-                       L2_M_5C2_READ_KEY,
-                       L2_M_5C2_FEED)
+import constants as c
 
 
 class TestLightClapperClient(TestCase):
@@ -22,10 +20,10 @@ class TestLightClapperClient(TestCase):
         """
         Setup TestLightClapperStorage
         """
-        self.writer = ThingSpeakWriter(L2_M_5C2_WRITE_KEY)
+        self.writer = ThingSpeakWriter(c.L2_M_5C2_WRITE_KEY)
         self.storage = LightClapperClient(
-            key=L2_M_5C2_READ_KEY,
-            feed=L2_M_5C2_FEED)
+            key=c.L2_M_5C2_READ_KEY,
+            feed=c.L2_M_5C2_FEED)
 
     def test_data_parse(self):
         """
@@ -45,6 +43,5 @@ class TestLightClapperClient(TestCase):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        level=logging.INFO)
+    logging.basicConfig(format=c.LOGGING_FORMAT, level=c.LOGGING_TEST_LEVEL)
     main()

@@ -1,14 +1,23 @@
 """
-db.py
-TODO: move to database folder later
+sqliteDB.py
+
+Notes
+-----
+- Docstrings follow the numpydoc style:
+  https://numpydoc.readthedocs.io/en/latest/format.html
+- Code follows the PEP 8 style guide:
+  https://www.python.org/dev/peps/pep-0008/
 """
 import abc
 import sqlite3
 import logging
+import constants as c
 
 
 LIGHT_CLAPPER_DB = 'lightclapper.db'
-LIGHT_CLAPPER_NAME = 'LightClapper'
+LIGHT_CLAPPER_TABLE_NAME = 'LightClapper'
+FIRST_ROW = 0
+SINGLE_RECORD = 1
 
 
 class SqliteDB(metaclass=abc.ABCMeta):
@@ -137,7 +146,8 @@ class LightDB(SqliteDB):
         Get all records from Table
     """
 
-    def __init__(self, db_file=LIGHT_CLAPPER_DB, name=LIGHT_CLAPPER_NAME):
+    def __init__(self, db_file=LIGHT_CLAPPER_DB,
+                 name=LIGHT_CLAPPER_TABLE_NAME):
         """
         Initialize LightClapperDB
 
@@ -153,12 +163,19 @@ class LightDB(SqliteDB):
     def create_table(self):
         """
         Create table for LightClapperDB
+
+        Raises
+        ------
+        Exception
+            Invalid use of SqliteDB context manager
         """
         logging.debug('Creating new table')
         if not self._dbconnect or not self._cursor:
             raise Exception('Invalid call to Context Manager method!')
+
         self._cursor.execute("create table {} (date text, \
-                         time text, lightStatus integer) \
+                         time text, location text, nodeID text, \
+                         lightStatus integer) \
                          ".format(self._name))
 
     def add_record(self, record):
@@ -169,14 +186,34 @@ class LightDB(SqliteDB):
         ----------
         record : dict
             Entry to add to DB
+
+        Raises
+        ------
+        Exception
+            Invalid use of SqliteDB context manager
+        Exception
+            Invalid LightClapperDB record
         """
         logging.debug('Adding new entry to table')
         if not self._dbconnect or not self._cursor:
             raise Exception('Invalid call to Context Manager method!')
 
-        self._cursor.execute("insert into {} values(?, ?, ?)".format(
+        date = record.get('date', '')
+        time = record.get('time', '')
+        location = record.get('location', '')
+        node_id = record.get('nodeID', '')
+        light_status = record.get('lightStatus', '')
+
+        if '' in (date, time, node_id, location, light_status):
+            raise Exception('Invalid LightClapperDB record!')
+
+        self._cursor.execute("insert into {} values(?, ?, ?, ?, ?)".format(
             self._name),
-            (record['date'], record['time'], record['lightStatus']))
+            (date,
+             time,
+             location,
+             node_id,
+             light_status))
 
     def record_exists(self, record):
         """
@@ -191,20 +228,31 @@ class LightDB(SqliteDB):
         -------
         record_exists : bool
             True if entry exists
+
+        Raises
+        ------
+        Exception
+            Invalid use of SqliteDB context manager
         """
+        record_exists = False
+
         logging.debug('Check if record exists in table')
         if not self._dbconnect or not self._cursor:
             raise Exception('Invalid call to Context Manager method!')
 
-        date = record['date']
-        time = record['time']
-        light_status = record['lightStatus']
+        date = record.get('date', '')
+        time = record.get('time', '')
+        location = record.get('location', '')
+        node_id = record.get('nodeID', '')
+        light_status = record.get('lightStatus', '')
 
         self._cursor.execute("""SELECT count(*) FROM {} WHERE \
-             date == ? and time = ? and lightStatus = ?""".format(self._name),
-                             (date, time, light_status))
+             date == ? and time = ? and location = ? and nodeID = ? \
+             and lightStatus = ?""".format(self._name),
+                             (date, time, node_id, location, light_status))
 
-        record_exists = True if self._cursor.fetchone()[0] == 1 else False
+        if self._cursor.fetchone()[FIRST_ROW] == SINGLE_RECORD:
+            record_exists = True
 
         logging.debug('Record exists? : {}'.format(record_exists))
         return record_exists
@@ -232,6 +280,8 @@ def light_clapper_db_test():
     with LightDB(db_file='test.db', name='test') as db_obj:
         record = {'date': 'fake_date',
                   'time': 'fake_time',
+                  'location': 'fake_room',
+                  'node_ID': 'fakeNode_001',
                   'lightStatus': 1}
 
         if not db_obj.table_exists():
@@ -242,7 +292,7 @@ def light_clapper_db_test():
 
     # TODO: add more verification
 
+
 if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        level=logging.DEBUG)
+    logging.basicConfig(format=c.LOGGING_FORMAT, level=c.LOGGING_LEVEL)
     light_clapper_db_test()

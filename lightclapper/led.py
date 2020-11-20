@@ -1,13 +1,24 @@
 #!/usr/bin/env python3
 """
 led.py
+
+Notes
+-----
+- Docstrings follow the numpydoc style:
+  https://numpydoc.readthedocs.io/en/latest/format.html
+- Code follows the PEP 8 style guide:
+  https://www.python.org/dev/peps/pep-0008/
 """
 import RPi.GPIO as GPIO
 from time import sleep
 import logging
+import constants as c
 
-LED_OUTPUT = 21
+LED_OUTPUT_PIN = 21
 LED_TEST_TIME_SECS = 0.5
+GPIO_WARNINGS_OFF = False
+ON_STRING = 'ON'
+OFF_STRING = 'OFF'
 
 
 class Led:
@@ -25,13 +36,13 @@ class Led:
     -------
     get_led_status()
         Returns the status of LED
-    set_led_status()
+    set_led_status(status)
         Sets the LED status
     invert_status()
         Inverts the status of the LED
     """
 
-    def __init__(self, pin=LED_OUTPUT):
+    def __init__(self, pin=LED_OUTPUT_PIN):
         """
         Initializes the Led
 
@@ -41,9 +52,9 @@ class Led:
             BCM GPIO pin number
         """
         self.__pin = pin
-        self.__led_on = False
+        self.__led_on = c.LED_OFF
         GPIO.setmode(GPIO.BCM)
-        GPIO.setwarnings(False)
+        GPIO.setwarnings(GPIO_WARNINGS_OFF)
         GPIO.setup(self.__pin, GPIO.OUT)
 
     def get_status(self):
@@ -64,19 +75,25 @@ class Led:
         status : bool
             True if LED on, False if LED off
         """
-        output_gpio = GPIO.HIGH if status else GPIO.LOW
+        output_gpio = None
+        output_string = ''
+
+        if status == c.LED_ON:
+            output_gpio = GPIO.HIGH
+            output_string = ON_STRING
+        else:
+            output_gpio = GPIO.LOW
+            output_string = OFF_STRING
+
         GPIO.output(self.__pin, output_gpio)
-
-        output_string = 'ON' if status else 'OFF'
-        logging.debug('LED: {}'.format(output_string))
-
         self.__led_on = status
+        logging.debug('LED status updated to {}'.format(output_string))
 
     def invert_status(self):
         """
         Inverts the LED status
          - If LED status on, turn off LED
-        - If LED status off, turn on LED
+         - If LED status off, turn on LED
 
         Returns
         -------
@@ -92,13 +109,14 @@ def led_test():
     Creates an Led object for manual LED verification
     """
     led = Led()
-    led.set_status(True)
+
+    led.set_status(c.LED_ON)
     sleep(LED_TEST_TIME_SECS)
-    led.set_status(False)
+    led.set_status(c.LED_OFF)
+
     GPIO.cleanup()
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        level=logging.DEBUG)
+    logging.basicConfig(format=c.LOGGING_FORMAT, level=c.LOGGING_DEFAULT_LEVEL)
     led_test()
