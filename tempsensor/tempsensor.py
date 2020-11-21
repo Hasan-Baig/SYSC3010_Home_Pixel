@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import RPi.GPIO as GPIO
 import time
 from fan import Fan
@@ -46,6 +47,10 @@ class TempSensor:
 		if checkingtemp <= THRESHOLD:
 			print ("ROOM TOO COLD - TURNING OFF")
 			self.__fan.cold_status(True)
+		return checkingtemp
+
+	def checking_status(self):
+		checkingtemp = self.__temp.read_data()
 		return checkingtemp
 
 	def __write_to_channel(self, tempDetected):
