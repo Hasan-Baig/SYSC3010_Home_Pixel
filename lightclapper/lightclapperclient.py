@@ -9,6 +9,7 @@ Notes
   https://www.python.org/dev/peps/pep-0008/
 """
 import logging
+import argparse
 from time import sleep
 import re
 from sqliteDB import LightDB
@@ -19,6 +20,7 @@ POLL_TIME_SECS = 5
 DATE_LIST_LENGTH = 2
 DATE_INDEX = 0
 TIME_INDEX = 1
+FIRST_INDEX = 0
 LAST_INDEX = -1
 INCREMENT = 1
 POLLING = True
@@ -35,6 +37,8 @@ class LightClapperClient:
         Reader of ThingSpeak channel
     __db : LightClapperDB
         DB to store LightClapper node data
+    __latest_data : dict
+        Latest data read from ThingSpeak channel
 
     Methods
     -------
@@ -42,6 +46,8 @@ class LightClapperClient:
         polls for new data from channel
     read_from_channel()
         Read & parse data from channel
+    __parse_data(feed)
+        Parse data for LightClapper fields
     __add_data_from_channel(channel_data)
         Add data from channel if it's not in DB table
     """
@@ -57,7 +63,8 @@ class LightClapperClient:
         feed : str
             Feed number for channel
         """
-        self.__reader = ThingSpeakReader(key, feed=feed)
+        self.__reader = ThingSpeakReader(key, feed)
+        self.__latest_data = None
 
         with LightDB(db_file=c.LIGHT_CLAPPER_DB_FILE,
                      name=c.LIGHT_CLAPPER_TABLE) as db_obj:
@@ -66,8 +73,10 @@ class LightClapperClient:
 
     def poll_channel(self):
         """
-        Poll for new data in channel
+        Poll for new data in channel.
+        If new data found, add to DB
         """
+        logging.info('LightClapperClient program running')
         try:
             while POLLING:
                 channel_data = self.read_from_channel()
@@ -80,8 +89,9 @@ class LightClapperClient:
         except KeyboardInterrupt:
             logging.info('Exiting due to keyboard interrupt')
 
-        except BaseException:
+        except BaseException as e:
             logging.error('An error or exception occurred!')
+            logging.error('Error traceback: {}'.format(e))
 
     def read_from_channel(self):
         """
@@ -94,45 +104,71 @@ class LightClapperClient:
             data parsed from JSON dict read from channel
         """
         parsed_data = []
+        read_data = self.__reader.read_from_channel()
+        feeds = read_data.get('feeds', '')
+
+        # Return if no data or if no new data in channel after last saved data
+        if not feeds or feeds[LAST_INDEX] == self.__latest_data:
+            logging.debug('No new data parsed from channel')
+            return parsed_data
+
+        # Find starting index (start after latest data or at beginning)
+        if self.__latest_data:
+            start_index = feeds.index(self.__latest_data) + INCREMENT
+        else:
+            start_index = FIRST_INDEX
+
+        # Iterate through feeds & parse for data
+        for f in feeds[start_index:]:
+            parse_status, data = self.__parse_data(f)
+            if parse_status:
+                parsed_data.append(data)
+
+        # Update latest_data value to new latest data record
+        self.__latest_data = feeds[LAST_INDEX]
+
+        return parsed_data
+
+    def __parse_data(self, feed):
+        """
+        Parse data from given feed
+
+        Parameters
+        ----------
+        feed : dict
+            Data read in feed from ThingSpeak
+
+        Returns
+        -------
+        bool
+            True if data successfully parsed
+        data : dict
+            Data parsed
+        """
         data = {'date': '',
                 'time': '',
                 'location': '',
                 'nodeID': '',
                 'lightStatus': ''}
-        read_data = self.__reader.read_from_channel()
-        feeds = read_data['feeds']
+        date_data = feed.get('created_at', '')
+        date_list = re.split('T|Z', date_data)
 
-        # Return if no new data in channel after last saved data
-        last_feed = feeds[LAST_INDEX]
-        if last_feed == self.__latest_data:
-            return parsed_data
+        if len(date_list) < DATE_LIST_LENGTH:
+            logging.warning('Skipping entry with unparseable date')
+            return False, data
 
-        start_index = feeds.index(self.__latest_data) + INCREMENT
+        data['date'] = date_list[DATE_INDEX]
+        data['time'] = date_list[TIME_INDEX]
+        data['location'] = feed.get(c.LOCATION_FIELD, '')
+        data['nodeID'] = feed.get(c.NODE_ID_FIELD, '')
+        data['lightStatus'] = feed.get(c.LIGHT_STATUS_FIELD, '')
 
-        for f in feeds[start_index:]:
-            date_data = f.get('created_at', '')
-            date_list = re.split('T|Z', date_data)
+        if '' in (data['nodeID'], data['location'], data['lightStatus']):
+            logging.warning('Skipping entry with missing fields')
+            return False, data
 
-            if len(date_list) < DATE_LIST_LENGTH:
-                # Skip entry since date cannot be parsed
-                continue
-
-            data['date'] = date_list[DATE_INDEX]
-            data['time'] = date_list[TIME_INDEX]
-            data['location'] = f.get(c.LOCATION_FIELD, '')
-            data['nodeID'] = f.get(c.NODE_ID_FIELD, '')
-            data['lightStatus'] = f.get(c.LIGHT_STATUS_FIELD, '')
-
-            if '' in (data['nodeID'], data['location'], data['lightStatus']):
-                # Skip entry since node, location or status are empty
-                continue
-
-            logging.debug('Data found: {}'.format(data))
-            parsed_data.append(data)
-
-        self.__latest_data = parsed_data[LAST_INDEX]
-
-        return parsed_data
+        logging.debug('Data parsed from channel: {}'.format(data))
+        return True, data
 
     def __add_data_from_channel(self, channel_data):
         """
@@ -154,12 +190,42 @@ def light_clapper_client_test():
     """
     Creates a LightClapperClient object for manual verification
     """
+    url = c.READ_URL.format(
+        CHANNEL_FEED=c.L2_M_5C1_FEED,
+        READ_KEY=c.L2_M_5C1_READ_KEY)
+    logging.info('Link to ThingSpeak channel data: {}'.format(url))
+
     light_clapper_client = LightClapperClient(
         key=c.L2_M_5C1_READ_KEY,
         feed=c.L2_M_5C1_FEED)
     light_clapper_client.poll_channel()
 
 
+def parse_args():
+    """
+    Parses arguments for manual operation of the LightClapperClient
+
+    Returns
+    -------
+    args : Namespace
+        Populated attributes based on args
+    """
+    parser = argparse.ArgumentParser(
+        description='Run the LightClapperClient program (CTRL-C to exit)')
+
+    parser.add_argument('-v',
+                        '--verbose',
+                        default=False,
+                        action='store_true',
+                        help='Print all debug logs')
+
+    args = parser.parse_args()
+    return args
+
+
 if __name__ == '__main__':
-    logging.basicConfig(format=c.LOGGING_FORMAT, level=c.LOGGING_DEFAULT_LEVEL)
+    args = parse_args()
+
+    logging_level = logging.DEBUG if args.verbose else logging.INFO
+    logging.basicConfig(format=c.LOGGING_FORMAT, level=logging_level)
     light_clapper_client_test()

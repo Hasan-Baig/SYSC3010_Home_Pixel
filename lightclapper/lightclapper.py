@@ -24,6 +24,7 @@ ZERO_SECS = 0
 POLL_TIME_SECS = 0.5
 ON_INT = 1
 OFF_INT = 0
+POLLING = True
 
 
 class LightClapper:
@@ -92,12 +93,17 @@ class LightClapper:
         Update LED based on mic input.
         Write update to ThingSpeak channel.
         """
+        logging.info('LightClapper program running')
+        logging.info('Writing to channel mode enabled?: {}'.format(
+            self.__write_mode))
         try:
-            while c.POLLING:
+            while POLLING:
                 toggled = self.check_and_update_status()
 
-                if toggled and self.__write_mode:
-                    self.__write_status_to_channel()
+                if toggled:
+                    logging.info('LightClapper toggled the LED')
+                    if self.__write_mode:
+                        self.__write_status_to_channel()
 
                 # If light status changed, wait before polling again
                 sleep_time = POLL_TIME_SECS if toggled else ZERO_SECS
@@ -106,12 +112,13 @@ class LightClapper:
         except KeyboardInterrupt:
             logging.info('Exiting due to keyboard interrupt')
 
-        except BaseException:
+        except BaseException as e:
             logging.error('An error or exception occurred!')
+            logging.error('Error traceback: {}'.format(e))
 
         finally:
             # Attempt to reset LED status and cleanup GPIO
-            if self.__led.get_status() == c.ON_STATUS:
+            if self.__led.get_status() == c.LED_ON:
                 self.__led.invert_status()
                 if self.__write_mode:
                     self.__write_status_to_channel()
@@ -138,7 +145,7 @@ class LightClapper:
         Write status of light clapper to channel
         """
         led_status = OFF_INT
-        if self.__led.get_status() == c.ON_STATUS:
+        if self.__led.get_status() == c.LED_ON:
             led_status = ON_INT
 
         fields = {c.LOCATION_FIELD: self.__location,

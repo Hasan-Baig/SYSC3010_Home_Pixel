@@ -71,6 +71,12 @@ class SqliteDB(metaclass=abc.ABCMeta):
     def __exit__(self, exception, value, trace):
         """
         DB context manager exit
+
+        Parameters
+        ----------
+        exception : type
+        value
+        trace : traceback
         """
         self.manual_exit()
 
