@@ -1,1 +1,0 @@
-# this script will call the poll() method for everyone's system 

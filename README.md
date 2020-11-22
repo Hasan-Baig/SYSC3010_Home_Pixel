@@ -11,6 +11,7 @@ sudo apt-get install python3-urllib3
 sudo apt install python3-gpiozero
 pip install nexmo
 sudo apt-get install rclone
+sudo apt install -y gpac
 ```
 
 ## Problems with Solutions
