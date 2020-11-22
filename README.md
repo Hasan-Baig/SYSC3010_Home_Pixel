@@ -1,7 +1,7 @@
 # SYSC3010_Home_Pixel
 Group Project: Building a Smart Home System
 
-This project uses python2
+This project uses python3
 
 ## Packages
 Before running the program, make sure these packages are installed on the RaspberryPi:
@@ -9,7 +9,7 @@ Before running the program, make sure these packages are installed on the Raspbe
 sudo apt-get install http.client
 sudo apt-get install python3-urllib3
 sudo apt install python3-gpiozero
-pip install nexmo
+pip3 install nexmo
 sudo apt-get install rclone
 sudo apt install -y gpac
 ```
