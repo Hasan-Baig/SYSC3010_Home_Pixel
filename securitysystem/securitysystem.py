@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """
-light_clapper.py
+Polls the motion sensor to upload to ThingSpeak and record video
 """
-import RPi.GPIO as GPIO
 import time
 from camera import Camera
 from motionsensorclass import MotionSensorClass
-from thinkspeakwriter import ThingSpeakWriter
+from thingspeakwriter import ThingSpeakWriter
 import nexmo
 import smtplib
+from subprocess import call  
+import subprocess
 import argparse
 import logging
 from constants import (L2_M_5A1_WRITE_KEY, 
@@ -33,16 +34,17 @@ class SecuritySystem:
         Initializes the attributes
         Parameters
         ----------
-        mic : Microphone
-            The microphone sensor
-        led : Led
-            The LED light
+        mic : MotionSensorClass
+            The motion sensor
+        led : Camera
+            The camera
         writer : ThingSpeakWriter
-            ThinkSpeak channel
+            ThingSpeak channel
         """
         self.__mts = mts
         self.__cam = cam
         self.__writer = writer
+        self.__link = ""
         
     def poll(self):
         """
@@ -56,8 +58,8 @@ class SecuritySystem:
                 if motionDetected[0]:
                     self.__write_to_channel(motionDetected[1], motionDetected[2])
                     self.__send_notification(motionDetected[1], motionDetected[2])
-                    # self.__upload_video(motionDetected[1], motionDetected[2])
-                    self.__email_link(motionDetected[1], motionDetected[2], "google.com")
+                    self.__upload_video(motionDetected[1], motionDetected[2])
+                    self.__email_link(motionDetected[1], motionDetected[2], self.__link)
 
                 # Wait before polling again
                 sleep_time = POLL_TIME_SECS if motionDetected[0] else 0
@@ -70,7 +72,7 @@ class SecuritySystem:
         finally:
             self.__cam.close_camera()
             self.__mts.close_sensor()
-            # self.__delete_local_videos()
+            self.__delete_local_videos()
 
     def update_status(self):
         """
@@ -84,16 +86,50 @@ class SecuritySystem:
         result = self.__mts.check_input()
         if(result[0]):
             self.__cam.record_video(result[1], result[2])
+            self.__convert_to_mp4(result[1], result[2])
         return result[0], result[1], result[2]
 
+    def __convert_to_mp4(self, date, time):                             #TEST
+        """
+        Convert video to mp4 file (playable on Windows)
+        """
+        try: 
+            path = "/home/pi/Desktop/Security_Cam/"
+            file_h264 = "{}{}_{}.h264".format(path, date, time)
+            file_mp4 = "{}{}_{}.mp4".format(path, date, time)
+            file_temp = "{}covert.h264".format(path)
+
+            #rename file_h264 to file_temp
+            command0 = "mv {} {}".format(file_h264, file_temp)
+            call([command0], shell=True)
+            
+            #convert file_temp to file_mp4
+            command1 = "MP4Box -add {} {}".format(file_temp, file_mp4)
+            call([command1], shell=True) 
+
+            #remove file_temp
+            command2 = "rm {}".format(file_temp)
+            call([command2], shell=True)
+            
+            logging.debug("Video converted to MP4 successfully!")
+        
+        except BaseException as e:
+            print('An error or exception occurred: ' + str(e))
+            exit()
+    
     def __write_to_channel(self, date, time):
         """
         Write status of motion to channel
         """
-        fields = {'field1': "{} {}".format(date, time)}
-        status, reason = self.__writer.write(fields)
-        if status != GOOD_STATUS:
-            raise Exception('Write was unsuccessful')
+        try:
+            fields = {'field1': "{} {}".format(date, time)}
+            status, reason = self.__writer.write(fields)
+            if status != GOOD_STATUS:
+                raise Exception('Write was unsuccessful')
+
+        except BaseException as e:
+            print('An error or exception occurred: ' + str(e))
+            exit()
 
     def __send_notification(self, date, time):
         """
@@ -115,15 +151,27 @@ class SecuritySystem:
 
         except BaseException as e:
             print('An error or exception occurred: ' + str(e))
+            exit()
 
     def __upload_video(self, date, time):
         """
         Upload video to Google Drive
         """
-        # fields = {'field1': "{} {}".format(date, time)}
-        # status, reason = self.__writer.write_to_channel(fields)
-        # if status != GOOD_STATUS:
-        #     raise Exception('Write was unsuccessful')
+        try: 
+            uploadPath = "/home/pi/Desktop/Home_Pixel/Dropbox-Uploader/dropbox_uploader.sh" 
+            vidfile = "/home/pi/Desktop/Security_Cam/{}_{}.mp4".format(date, time)
+            upl = "{} upload {} /HOMEPIXEL".format(uploadPath, vidfile)   
+            call ([upl], shell=True)  
+
+            h, m, s = time.split(":")
+            self.__link = "https://www.dropbox.com/home/HOMEPIXEL?preview={}_{}%3A{}%3A{}.mp4".format(date, h, m, s)
+            
+            logging.debug("Video uploaded successfully!")
+        
+        except BaseException as e:
+            print('An error or exception occurred: ' + str(e))
+            exit()
+        
 
     def __email_link(self, date, time, link):
         """
@@ -148,22 +196,28 @@ class SecuritySystem:
             session.login(GMAIL_USERNAME, GMAIL_PASSWORD)
     
             #Send Email & Exit
-            session.sendmail(GMAIL_USERNAME, GMAIL_USERNAME, headers + "\r\n\r\n" + link)
+            session.sendmail(GMAIL_USERNAME, GMAIL_USERNAME, headers + "\r\n\r\n" + "The 10 second video when motion is detected is shown here: " + link)
             session.quit
 
             logging.debug("Email sent successfully!")
         
         except BaseException as e:
             print('An error or exception occurred: ' + str(e))
+            exit()
 
     def __delete_local_videos(self):
         """
         Deletes all videos stored locally 
         """
-        # fields = {'field1': "{} {}".format(date, time)}
-        # status, reason = self.__writer.write_to_channel(fields)
-        # if status != GOOD_STATUS:
-        #     raise Exception('Write was unsuccessful')
+        try: 
+            removeLocal = "rm /home/pi/Desktop/Security_Cam/*"  
+            call ([removeLocal], shell=True)
+
+            logging.debug("Removed all local video files!")
+        
+        except BaseException as e:
+            print('An error or exception occurred: ' + str(e))
+            exit()     
 
 
 def parse_args():
