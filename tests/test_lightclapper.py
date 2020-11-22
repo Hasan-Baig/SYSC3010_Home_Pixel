@@ -165,8 +165,8 @@ class TestLightClapper(TestCase):
     Methods
     -------
     setUp()
-    test_check_and_update_status_on()
-    test_check_and_update_status_off()
+    test_check_and_update_status_toggled()
+    test_check_and_update_status_not_toggled()
     """
 
     def setUp(self):
@@ -181,7 +181,7 @@ class TestLightClapper(TestCase):
         self.__light_clapper = LightClapper(test_location,
                                             mic=self.__mic_mock, led=led_mock)
 
-    def test_check_and_update_status_on(self):
+    def test_check_and_update_status_toggled(self):
         """
         Test if microphone sensor detects sound, does
         check_clap_set_light return toggled = True
@@ -192,7 +192,7 @@ class TestLightClapper(TestCase):
             self.__light_clapper.check_and_update_status(),
             err_msg)
 
-    def test_check_and_update_status_off(self):
+    def test_check_and_update_status_not_toggled(self):
         """
         Test if microphone sensor does not detect sound, does
         check_clap_set_light return toggled = False
