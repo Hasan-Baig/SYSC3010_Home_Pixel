@@ -17,9 +17,11 @@ class ThingSpeakReader():
 
 def read_test():
 	reader = ThingSpeakReader(key = READ_KEY_D2, feed = FEED_D2)
+#	reader = ThingSpeakReader(key = READ_KEY_D1, feed = FEED_D1)
 	fields = reader.read_from_channel()
 	logging.debug(fields)
 	read_url = READ_URL.format(CHANNEL_FEED = FEED_D2, READ_KEY = READ_KEY_D2, HEADER = 2)
+#	read_url = READ_URL.format(CHANNEL_FEED = FEED_D1, READ_KEY = READ_KEY_D2, HEADER = 2)
 	logging.debug("Check Results --> {}".format(read_url))
 
 if __name__ == "__main__":
