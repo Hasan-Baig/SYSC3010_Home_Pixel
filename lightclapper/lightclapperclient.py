@@ -12,7 +12,7 @@ import logging
 import argparse
 from time import sleep
 import re
-from sqliteDB import LightDB
+from sqliteDB import LightClapperDB
 from thingspeakreader import ThingSpeakReader
 import constants as c
 
@@ -66,8 +66,8 @@ class LightClapperClient:
         self.__reader = ThingSpeakReader(key, feed)
         self.__latest_data = None
 
-        with LightDB(db_file=c.LIGHT_CLAPPER_DB_FILE,
-                     name=c.LIGHT_CLAPPER_TABLE) as db_obj:
+        with LightClapperDB(db_file=c.LIGHT_CLAPPER_DB_FILE,
+                            name=c.LIGHT_CLAPPER_TABLE) as db_obj:
             if not db_obj.table_exists():
                 db_obj.create_table()
 
@@ -145,11 +145,7 @@ class LightClapperClient:
         data : dict
             Data parsed
         """
-        data = {'date': '',
-                'time': '',
-                'location': '',
-                'nodeID': '',
-                'lightStatus': ''}
+        data = {}
         date_data = feed.get('created_at', '')
         date_list = re.split('T|Z', date_data)
 
@@ -157,11 +153,11 @@ class LightClapperClient:
             logging.warning('Skipping entry with unparseable date')
             return False, data
 
-        data['date'] = date_list[DATE_INDEX]
-        data['time'] = date_list[TIME_INDEX]
-        data['location'] = feed.get(c.LOCATION_FIELD, '')
-        data['nodeID'] = feed.get(c.NODE_ID_FIELD, '')
-        data['lightStatus'] = feed.get(c.LIGHT_STATUS_FIELD, '')
+        data = {'date': date_list[DATE_INDEX],
+                'time': date_list[TIME_INDEX],
+                'location': feed.get(c.LOCATION_FIELD, ''),
+                'nodeID': feed.get(c.NODE_ID_FIELD, ''),
+                'lightStatus': feed.get(c.LIGHT_STATUS_FIELD, '')}
 
         if '' in (data['nodeID'], data['location'], data['lightStatus']):
             logging.warning('Skipping entry with missing fields')
@@ -180,7 +176,8 @@ class LightClapperClient:
         channel_data : list
             data read from the channel
         """
-        with LightDB(db_file='lightclapper.db', name='LightClapper') as db_obj:
+        with LightClapperDB(
+                db_file='lightclapper.db', name='LightClapper') as db_obj:
             for data in channel_data:
                 if not db_obj.record_exists(data):
                     db_obj.add_record(data)

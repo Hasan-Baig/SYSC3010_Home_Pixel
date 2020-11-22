@@ -29,6 +29,8 @@ READ_URL_LIMITED = 'https://api.thingspeak.com/channels/' + \
 # LightClapper constants
 SOUND_DETECTED = True
 SOUND_NOT_DETECTED = False
+ON_INT = 1
+OFF_INT = 0
 LED_ON = True
 LED_OFF = False
 LIGHT_CLAPPER_NAME = 'lightclapper'
@@ -36,6 +38,12 @@ LIGHT_CLAPPER_NAME = 'lightclapper'
 # LightClapper DB constants
 LIGHT_CLAPPER_DB_FILE = 'lightclapper.db'
 LIGHT_CLAPPER_TABLE = 'LightClapper'
+LIGHT_CLAPPER_RECORD = {
+    'date': '',
+    'time': '',
+    'location': '',
+    'nodeID': '',
+    'lightStatus': ''}
 
 # Logging Constants
 LOGGING_FORMAT = '%(asctime)s - %(levelname)s - %(message)s'

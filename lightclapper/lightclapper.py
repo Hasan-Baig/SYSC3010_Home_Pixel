@@ -22,8 +22,6 @@ DEFAULT_ID = 0
 ID_INCREMENT = 1
 ZERO_SECS = 0
 POLL_TIME_SECS = 0.5
-ON_INT = 1
-OFF_INT = 0
 POLLING = True
 
 
@@ -49,7 +47,7 @@ class LightClapper:
     Methods
     -------
     poll()
-        Polls to inverts the light status based on mic input
+        Polls to get mic input and invert the light status accordingly
     check_and_update_status()
         Inverts the light status based on mic input
     __write_status_to_channel()
@@ -144,9 +142,9 @@ class LightClapper:
         """
         Write status of light clapper to channel
         """
-        led_status = OFF_INT
+        led_status = c.OFF_INT
         if self.__led.get_status() == c.LED_ON:
-            led_status = ON_INT
+            led_status = c.ON_INT
 
         fields = {c.LOCATION_FIELD: self.__location,
                   c.NODE_ID_FIELD: self.__node_id,
@@ -194,9 +192,7 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
-
     logging_level = logging.DEBUG if args.verbose else logging.INFO
     logging.basicConfig(format=c.LOGGING_FORMAT, level=logging_level)
-
     light_clapper = LightClapper(args.location, write=args.write)
     light_clapper.poll()
