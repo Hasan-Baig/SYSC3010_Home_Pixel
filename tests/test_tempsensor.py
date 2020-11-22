@@ -15,10 +15,16 @@ class TestTempSensor(TestCase):
 		self.temp_sensor = TempSensor(temp = self.temp_mock, fan = self.fan_mock)
 
 	def test_checking_status_true(self):
+		"""
+		Testing to see if the TempSensor node is functioning properly
+		"""
 		self.temp_mock.read_data.return_value = True
 		self.assertTrue(self.temp_sensor.checking_status())
 
 	def test_checking_status_false(self):
+		"""
+		Testing to see if the TempSensor node does not function properly
+		"""
 		self.temp_mock.read_data.return_value = False
 		self.assertFalse(self.temp_sensor.checking_status())
 
@@ -65,11 +71,17 @@ class TestTemperature(TestCase):
 		GPIO.cleanup()
 
 	def test_check_input_detected(self, mock_input):
+		"""
+		Testing Input Detected
+		"""
 		mock_input.return_value = True
 		err_msg = "Temp Sensor did not detect any temperature"
 		self.assertTrue(self.temp.read_data(), err_msg)
 
 	def test_check_input_not_detected(self, mock_input):
+		"""
+		Testing input NOT detected
+		"""
 		mock_input.return_value = False
 		err_msg = "Temp Sensor detected temperature"
 		self.assertTrue(self.temp.read_data(), err_msg)
