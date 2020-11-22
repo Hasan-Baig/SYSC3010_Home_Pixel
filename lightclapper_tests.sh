@@ -1,6 +1,6 @@
 #!/bin/sh
-
-echo "Runnning LightClapper node unittests..."
+# Script to run LightClapper node unittests
+echo "Running LightClapper node unittests..."
 python3 tests/test_lightclapper.py -v
 python3 tests/test_lightclapperclient.py -v
 python3 tests/test_lightclapperdb.py -v

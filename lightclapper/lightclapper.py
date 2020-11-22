@@ -20,7 +20,6 @@ import constants as c
 
 DEFAULT_ID = 0
 ID_INCREMENT = 1
-ZERO_SECS = 0
 POLL_TIME_SECS = 0.5
 POLLING = True
 
@@ -53,7 +52,7 @@ class LightClapper:
     __write_status_to_channel()
         Writes information to ThingSpeak channel
     """
-    light_clapper_id = DEFAULT_ID   # Static ID of LightClapper unit
+    light_clapper_id = DEFAULT_ID   # Class variable (static)
 
     def __init__(self, location, mic=Microphone(), led=Led(),
                  write=False, write_key=c.L2_M_5C1_WRITE_KEY):
@@ -74,14 +73,13 @@ class LightClapper:
             Optional key if writing to ThingSpeak channel
         """
         LightClapper.light_clapper_id += ID_INCREMENT
-        self.__node_id = '{node_name}_{id}'.format(
-            node_name=c.LIGHT_CLAPPER_NAME,
+        self.__node_id = '{node}_{id}'.format(
+            node=c.LIGHT_CLAPPER_NAME,
             id=LightClapper.light_clapper_id)
 
         self.__location = location
         self.__mic = mic
         self.__led = led
-
         self.__write_mode = write
         self.__writer = ThingSpeakWriter(write_key) if write else None
 
@@ -94,18 +92,18 @@ class LightClapper:
         logging.info('LightClapper program running')
         logging.info('Writing to channel mode enabled?: {}'.format(
             self.__write_mode))
+
         try:
             while POLLING:
-                toggled = self.check_and_update_status()
+                status = self.check_and_update_status()
 
-                if toggled:
+                if status == c.TOGGLED:
                     logging.info('LightClapper toggled the LED')
                     if self.__write_mode:
                         self.__write_status_to_channel()
 
-                # If light status changed, wait before polling again
-                sleep_time = POLL_TIME_SECS if toggled else ZERO_SECS
-                sleep(sleep_time)
+                    # Wait before polling again
+                    sleep(POLL_TIME_SECS)
 
         except KeyboardInterrupt:
             logging.info('Exiting due to keyboard interrupt')
@@ -129,14 +127,13 @@ class LightClapper:
 
         Returns
         -------
-        toggled : bool
+        bool
             True if light status was toggled
         """
-        toggled = False
         if self.__mic.check_input() == c.SOUND_DETECTED:
             self.__led.invert_status()
-            toggled = True
-        return toggled
+            return c.TOGGLED
+        return c.NOT_TOGGLED
 
     def __write_status_to_channel(self):
         """

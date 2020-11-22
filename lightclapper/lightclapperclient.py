@@ -28,15 +28,13 @@ POLLING = True
 
 class LightClapperClient:
     """
-    Class to parse light clapper data
-    and store in database
+    Class to parse LightClapper node data
+    and store in LightClapperDB database
 
     Attributes
     ----------
     __reader : ThingSpeakReader
         Reader of ThingSpeak channel
-    __db : LightClapperDB
-        DB to store LightClapper node data
     __latest_data : dict
         Latest data read from ThingSpeak channel
 
@@ -54,7 +52,7 @@ class LightClapperClient:
 
     def __init__(self, key=c.L2_M_5C1_READ_KEY, feed=c.L2_M_5C1_FEED):
         """
-        Initialize light clapper node storage
+        Initialize LightClapperClient
 
         Parameters
         ----------
@@ -96,7 +94,7 @@ class LightClapperClient:
     def read_from_channel(self):
         """
         Parses data read from channel related to the
-        Light Clapper Node
+        LightClapper node
 
         Returns
         -------
@@ -148,20 +146,30 @@ class LightClapperClient:
         data = {}
         date_data = feed.get('created_at', '')
         date_list = re.split('T|Z', date_data)
+        location = feed.get(c.LOCATION_FIELD, '')
+        node_id = feed.get(c.NODE_ID_FIELD, '')
+
+        try:
+            light_status = int(feed.get(c.LIGHT_STATUS_FIELD, ''))
+        except ValueError:
+            logging.warning('Skipping entry with invalid light status type')
+            return False, data
 
         if len(date_list) < DATE_LIST_LENGTH:
             logging.warning('Skipping entry with unparseable date')
             return False, data
+        elif '' in [location, node_id]:
+            logging.warning('Skipping entry with missing fields')
+            return False, data
+        elif light_status not in [c.OFF_INT, c.ON_INT]:
+            logging.warning('Skipping entry with invalid light status')
+            return False, data
 
         data = {'date': date_list[DATE_INDEX],
                 'time': date_list[TIME_INDEX],
-                'location': feed.get(c.LOCATION_FIELD, ''),
-                'nodeID': feed.get(c.NODE_ID_FIELD, ''),
-                'lightStatus': feed.get(c.LIGHT_STATUS_FIELD, '')}
-
-        if '' in (data['nodeID'], data['location'], data['lightStatus']):
-            logging.warning('Skipping entry with missing fields')
-            return False, data
+                'location': location,
+                'nodeID': node_id,
+                'lightStatus': light_status}
 
         logging.debug('Data parsed from channel: {}'.format(data))
         return True, data
@@ -176,8 +184,8 @@ class LightClapperClient:
         channel_data : list
             data read from the channel
         """
-        with LightClapperDB(
-                db_file='lightclapper.db', name='LightClapper') as db_obj:
+        with LightClapperDB(db_file=c.LIGHT_CLAPPER_DB_FILE,
+                            name=c.LIGHT_CLAPPER_TABLE) as db_obj:
             for data in channel_data:
                 if not db_obj.record_exists(data):
                     db_obj.add_record(data)
@@ -222,7 +230,6 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
-
     logging_level = logging.DEBUG if args.verbose else logging.INFO
     logging.basicConfig(format=c.LOGGING_FORMAT, level=logging_level)
     light_clapper_client_test()

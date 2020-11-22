@@ -1,0 +1,5 @@
+Files in this directory are pre-made SQL database tables
+using sqlite3 COLI commands.
+
+These files are used in unit-testing and should not be
+modified without updating the associated test cases.

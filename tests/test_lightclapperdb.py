@@ -45,7 +45,7 @@ class TestLightClapperDB(TestCase):
         Setup TestLightClapperDB
         """
         self.__db = LightClapperDB(db_file=TEMP_DB,
-                                   name=PREMADE_TABLE)
+                                   name=TEMP_TABLE)
         self.__db.manual_enter()
 
     def tearDown(self):
@@ -64,7 +64,6 @@ class TestLightClapperDB(TestCase):
         self.assertFalse(self.__db.table_exists(), err_msg)
 
         self.__db.create_table()
-
         err_msg = 'Table does not exist'
         self.assertTrue(self.__db.table_exists(), err_msg)
 

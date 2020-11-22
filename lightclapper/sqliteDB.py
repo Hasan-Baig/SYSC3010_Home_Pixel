@@ -54,14 +54,14 @@ class SqliteDB(metaclass=abc.ABCMeta):
 
     def __init__(self, db_file, name):
         """
-        Initialize SqliteDatabase Context Manager
+        Initialize SqliteDB Context Manager
 
         Parameters
         ----------
         db_file : str
             file name of sqlite DB file
         name : str
-            name of DB
+            name of DB table
         """
         self._db_file = db_file
         self._name = name
@@ -71,6 +71,10 @@ class SqliteDB(metaclass=abc.ABCMeta):
     def __enter__(self):
         """
         DB context manager entry
+
+        Returns
+        -------
+        SqliteDB
         """
         self.manual_enter()
         return self
@@ -150,7 +154,7 @@ class SqliteDB(metaclass=abc.ABCMeta):
 
 class LightClapperDB(SqliteDB):
     """
-    DB for Light Clapper node
+    DB for LightClapper node
 
     Methods
     -------
@@ -174,7 +178,7 @@ class LightClapperDB(SqliteDB):
         db_file : str
             file name of sqlite DB file
         name : str
-            name of DB
+            name of DB table
         """
         super().__init__(db_file, name)
 
@@ -450,3 +454,5 @@ if __name__ == '__main__':
             args.table_name,
             args.location,
             args.node_id)
+    else:
+        logging.error('No test DB specified!')

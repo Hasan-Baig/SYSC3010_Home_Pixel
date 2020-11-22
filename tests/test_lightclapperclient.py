@@ -53,13 +53,13 @@ class TestLightClapperClient(TestCase):
                 'time': '21:44:53',
                 'location': 'my_room',
                 'nodeID': 'lightclapper_123',
-                'lightStatus': '1'}
+                'lightStatus': c.ON_INT}
         mock_data = {'feeds':
                      [{'created_at': '{d}T{t}Z'.format(d=data['date'],
                                                        t=data['time']),
-                       'field1': data['location'],
-                       'field2': data['nodeID'],
-                       'field3': data['lightStatus']}]}
+                       c.LOCATION_FIELD: data['location'],
+                       c.NODE_ID_FIELD: data['nodeID'],
+                       c.LIGHT_STATUS_FIELD: data['lightStatus']}]}
 
         expected = [data]
         mock_read.return_value = mock_data
@@ -78,11 +78,11 @@ class TestLightClapperClient(TestCase):
         """
         data = {'date': '2020-11-21',
                 'time': '21:44:53',
-                'lightStatus': '1'}
+                'lightStatus': 'abc'}
         mock_data = {'feeds':
                      [{'created_at': '{d}T{t}Z'.format(d=data['date'],
                                                        t=data['time']),
-                       'field1': data['lightStatus']}]}
+                       c.LIGHT_STATUS_FIELD: data['lightStatus']}]}
 
         expected = []
         mock_read.return_value = mock_data

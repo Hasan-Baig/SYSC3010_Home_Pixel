@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-thingspreakwriter.py
+thingspeakwriter.py
 
 Notes
 -----
@@ -59,15 +59,14 @@ class ThingSpeakWriter():
         reason : str
             reason for status of write
         """
+        headers = {'Content-typZZe': 'application/x-www-form-urlencoded',
+                   'Accept': 'text/plain'}
         fields['key'] = self.__key
         status = None
         reason = None
         params = urllib.parse.urlencode(fields)
-
         logging.debug('Fields to write: {}'.format(fields))
 
-        headers = {'Content-typZZe': 'application/x-www-form-urlencoded',
-                   'Accept': 'text/plain'}
         try:
             conn = http.client.HTTPConnection('api.thingspeak.com:80')
             conn.request('POST', '/update', params, headers)
@@ -122,7 +121,7 @@ def parse_args():
     default_test_data = str(random.randint(random_min, random_max))
 
     parser = argparse.ArgumentParser(
-        description='Run the ThingSpeakWriter test program (CTRL-C to exit)')
+        description='Run the ThingSpeakWriter test program')
 
     parser.add_argument('-v',
                         '--verbose',
@@ -143,7 +142,6 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
-
     logging_level = logging.DEBUG if args.verbose else logging.INFO
     logging.basicConfig(format=c.LOGGING_FORMAT, level=logging_level)
     write_test(args.data)

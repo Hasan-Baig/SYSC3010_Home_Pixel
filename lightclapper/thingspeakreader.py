@@ -104,10 +104,10 @@ def parse_args():
     args : Namespace
         Populated attributes based on args
     """
-    default_test_entries = 10
+    default_test_results = 10
 
     parser = argparse.ArgumentParser(
-        description='Run the ThingSpeakReader test program (CTRL-C to exit)')
+        description='Run the ThingSpeakReader test program')
 
     parser.add_argument('-v',
                         '--verbose',
@@ -117,9 +117,9 @@ def parse_args():
 
     parser.add_argument('-n',
                         '--number',
-                        default=default_test_entries,
+                        default=default_test_results,
                         type=int,
-                        metavar='<{}>'.format(default_test_entries),
+                        metavar='<number_of_results>',
                         help='# of entries to read from ThingSpeak channel')
 
     args = parser.parse_args()
@@ -128,7 +128,6 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
-
     logging_level = logging.DEBUG if args.verbose else logging.INFO
     logging.basicConfig(format=c.LOGGING_FORMAT, level=logging_level)
     read_test(args.number)

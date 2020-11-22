@@ -55,14 +55,13 @@ class Microphone:
 
         Returns
         -------
-        sound_detected : bool
+        bool
             True if sound detected
         """
-        sound_detected = False
         if GPIO.input(self.__pin):
             logging.debug("Microphone sensor detects sound")
-            sound_detected = True
-        return sound_detected
+            return c.SOUND_DETECTED
+        return c.SOUND_NOT_DETECTED
 
 
 def microphone_test():
@@ -73,6 +72,7 @@ def microphone_test():
         mic = Microphone()
         while POLLING:
             if mic.check_input() == c.SOUND_DETECTED:
+                # Sleep before checking for sound input again
                 sleep(MIC_POLL_TIME_SECS)
 
     except KeyboardInterrupt:
