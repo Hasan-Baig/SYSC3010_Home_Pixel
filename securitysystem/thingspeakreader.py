@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Reading data collected from ThinkSpeak
+Reading data collected from ThingSpeak
 """
 import requests
 import json

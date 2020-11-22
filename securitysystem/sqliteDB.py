@@ -1,6 +1,5 @@
 """
 Methods to create/insert into databases 
-TODO: test
 """
 import abc
 import sqlite3

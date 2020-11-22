@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Writing data collected from motion sensor to ThinkSpeak
+Writing data collected from motion sensor to ThingSpeak
 """
-# import http.client    #used in desktop (python3)
-import httplib          #used in RPI (python2)
+import http.client    #python3
+# import httplib      #python2
 import urllib
 import logging
 from datetime import datetime
@@ -21,16 +21,16 @@ class ThingSpeakWriter():
         fields['key'] = self.__key
         status = None
         reason = None
-        # params = urllib.parse.urlencode(fields)   #used in desktop (python3)
-        params = urllib.urlencode(fields)           #used in RPI (python2)
+        params = urllib.parse.urlencode(fields)         #python3
+        # params = urllib.urlencode(fields)             #python2
 
         logging.debug('Fields: {}'.format(fields))
 
         headers = {'Content-typZZe': 'application/x-www-form-urlencoded',
                    'Accept': 'text/plain'}
                    
-        # conn = http.client.HTTPConnection('api.thingspeak.com:80')    #used in desktop (python3)
-        conn = httplib.HTTPConnection('api.thingspeak.com:80')   #used in RPI (python2)
+        conn = http.client.HTTPConnection('api.thingspeak.com:80')    #python3
+        # conn = httplib.HTTPConnection('api.thingspeak.com:80')      #python2
 
         try:
             conn.request('POST', '/update', params, headers)
