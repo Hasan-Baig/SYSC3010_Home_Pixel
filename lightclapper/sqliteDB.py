@@ -12,6 +12,7 @@ import abc
 import sqlite3
 import logging
 import argparse
+import os
 import constants as c
 
 FIRST_ROW = 0
@@ -311,9 +312,9 @@ def records_to_string(records):
     records_str : str
         String representation of records from DB
     """
-    records_str = '  date, time, location, nodeID, lightStatus'
+    records_str = '  date|time|location|nodeID|lightStatus'
     for r in records:
-        records_str += '\n  {},{},{},{},{}'.format(
+        records_str += '\n  {}|{}|{}|{}|{}'.format(
             r.get('date', ''),
             r.get('time', ''),
             r.get('location', ''),
@@ -373,7 +374,8 @@ def light_clapper_db_test(file_name, table_name, location, node_id):
         records_str = records_to_string(records)
         logging.info('Read records:\n{}'.format(records_str))
 
-    logging.info('Open {} in SQL Browser for verification'.format(file_name))
+    logging.info('Open {cwd}/{f} in SQL Browser for verification'.format(
+        cwd=os.getcwd(), f=file_name))
 
 
 def parse_args():
@@ -398,6 +400,12 @@ def parse_args():
                         default=False,
                         action='store_true',
                         help='Print all debug logs')
+
+    parser.add_argument('-lc',
+                        '--light_clapper',
+                        default=False,
+                        action='store_true',
+                        help='Run LightClapperDB test')
 
     parser.add_argument('-f',
                         '--file_name',
@@ -435,8 +443,10 @@ if __name__ == '__main__':
     args = parse_args()
     logging_level = logging.DEBUG if args.verbose else logging.INFO
     logging.basicConfig(format=c.LOGGING_FORMAT, level=logging_level)
-    light_clapper_db_test(
-        args.file_name,
-        args.table_name,
-        args.location,
-        args.node_id)
+
+    if args.light_clapper:
+        light_clapper_db_test(
+            args.file_name,
+            args.table_name,
+            args.location,
+            args.node_id)

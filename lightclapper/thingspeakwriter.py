@@ -105,7 +105,7 @@ def write_test(test_data):
     read_url = c.READ_URL.format(
         CHANNEL_FEED=c.L2_M_5C2_FEED,
         READ_KEY=c.L2_M_5C2_READ_KEY)
-    logging.info('Compare with results here: {}'.format(read_url))
+    logging.info('Compare with most recent data here: {}'.format(read_url))
 
 
 def parse_args():

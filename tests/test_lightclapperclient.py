@@ -19,7 +19,7 @@ import constants as c
 @patch('thingspeakreader.ThingSpeakReader.read_from_channel')
 class TestLightClapperClient(TestCase):
     """
-    Test methods in LightClapperStorage
+    Test methods in LightClapperClient
 
     Attributes
     ----------
@@ -34,7 +34,7 @@ class TestLightClapperClient(TestCase):
 
     def setUp(self):
         """
-        Setup TestLightClapperStorage
+        Setup TestLightClapperClient
         """
         self.__client = LightClapperClient(
             key=c.L2_M_5C2_READ_KEY,
