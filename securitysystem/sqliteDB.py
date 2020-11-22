@@ -7,11 +7,6 @@ import sqlite3
 import logging
 from datetime import datetime, time
 
-# use this database to connect all three
-# HOME_PIXEL_DB = 'homepixel.db'
-# HOME_PIXEL_NAME = 'HomePixel'
-
-# can move these values into constants.py
 SECURITY_SYSTEM_DB = 'securitysystem.db'
 SECURITY_SYSTEM_NAME = 'SecuritySystem'
 
@@ -228,8 +223,8 @@ def security_system_db_test():
         fake_date = datetime.now().date()
         fake_time = datetime.now().strftime("%H:%M:%S")
 
-        record = {'date': 'fake_date',
-                  'time': 'fake_time'}
+        record = {'date': fake_date,
+                  'time': fake_time}
 
         if not db_obj.table_exists():
             db_obj.create_table()

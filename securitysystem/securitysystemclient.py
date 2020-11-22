@@ -1,12 +1,11 @@
 """
-Read data from ThinkSpeak and store in Database
-TODO: test with database
+Read data from ThingSpeak and store in Database
 """
 import logging
 import time
 import string
-# from sqliteDB import SecurityDB
-from thinkspeakreader import ThingSpeakReader
+from sqliteDB import SecurityDB
+from thingspeakreader import ThingSpeakReader
 from constants import (L2_M_5A1_READ_KEY,
                        L2_M_5A2_READ_KEY,
                        L2_M_5A1_FEED,
@@ -20,16 +19,16 @@ class SecuritySystemClient:
     def __init__(self, key, feed):
         self.__reader = ThingSpeakReader(key, feed)
 
-        # with SecurityDB(db_file='securitysystem.db', name='SecuritySystem') as db_obj:
-        #     if not db_obj.table_exists():
-        #         db_obj.create_table()
+        with SecurityDB(db_file='securitysystem.db', name='SecuritySystem') as db_obj:
+            if not db_obj.table_exists():
+                db_obj.create_table()
 
     def poll_channel(self):
         try:
             while True:
                 channel_data = self.read_channel()
-                # if channel_data:
-                    # self.__add_data_from_channel(channel_data)
+                if channel_data:
+                    self.__add_data_from_channel(channel_data)
                 time.sleep(POLL_TIME_SECS)
         except KeyboardInterrupt:
             print('Exiting')
@@ -58,15 +57,15 @@ class SecuritySystemClient:
 
         return parsed_data
 
-    # def __add_data_from_channel(self, channel_data):
-    #     with SecurityDB(db_file='securitysystem.db', name='SecuritySystem') as db_obj:
-    #         for data in channel_data:
-    #             if not db_obj.record_exists(data):
-    #                 db_obj.add_record(data)
+    def __add_data_from_channel(self, channel_data):
+        with SecurityDB(db_file='securitysystem.db', name='SecuritySystem') as db_obj:
+            for data in channel_data:
+                if not db_obj.record_exists(data):
+                    db_obj.add_record(data)
 
 
 def security_system_client_test():
-    security_system_client = SecuritySystemClient(L2_M_5A2_READ_KEY,L2_M_5A2_FEED)
+    security_system_client = SecuritySystemClient(L2_M_5A1_READ_KEY,L2_M_5A1_FEED)
     security_system_client.poll_channel()
 
 
