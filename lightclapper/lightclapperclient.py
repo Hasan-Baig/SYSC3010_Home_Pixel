@@ -80,6 +80,7 @@ class LightClapperClient:
                 channel_data = self.read_from_channel()
 
                 if channel_data:
+                    logging.info('New data parsed from channel')
                     self.__add_data_from_channel(channel_data)
 
                 sleep(POLL_TIME_SECS)
