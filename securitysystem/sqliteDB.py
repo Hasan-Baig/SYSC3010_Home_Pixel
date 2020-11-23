@@ -4,10 +4,13 @@ Methods to create/insert into databases
 import abc
 import sqlite3
 import logging
+import argparse
+import os
+import constants as c
 from datetime import datetime, time
 
-SECURITY_SYSTEM_DB = 'securitysystem.db'
-SECURITY_SYSTEM_NAME = 'SecuritySystem'
+FIRST_ROW = 0
+SINGLE_RECORD = 1
 
 class SqliteDB(metaclass=abc.ABCMeta):
     """"
@@ -30,11 +33,19 @@ class SqliteDB(metaclass=abc.ABCMeta):
         manually perform context manager exit
     table_exists()
         Check if table exists
+    create_table()
+        Abstract method to create table
+    add_record(record)
+        Abstract method to add record
+    record_exists(record)
+        Abstract method to check if record exists
+    get_records()
+        Abstract method to get records
     """
 
     def __init__(self, db_file, name):
         """
-        Initialize SqliteDatabase Context Manager
+        Initialize SqliteDB Context Manager
         Parameters
         ----------
         db_file : str
@@ -50,6 +61,10 @@ class SqliteDB(metaclass=abc.ABCMeta):
     def __enter__(self):
         """
         DB context manager entry
+        
+        Returns
+        -------
+        SqliteDB
         """
         self.manual_enter()
         return self
@@ -57,6 +72,12 @@ class SqliteDB(metaclass=abc.ABCMeta):
     def __exit__(self, exception, value, trace):
         """
         DB context manager exit
+                
+        Parameters
+        ----------
+        exception : type
+        value
+        trace : traceback
         """
         self.manual_exit()
 
@@ -95,7 +116,12 @@ class SqliteDB(metaclass=abc.ABCMeta):
         self._cursor.execute("SELECT count(name) FROM sqlite_master WHERE \
                        type='table' AND name='{}'".format(self._name))
 
-        table_exists = True if self._cursor.fetchone()[0] == 1 else False
+        if self._cursor.fetchone()[FIRST_ROW] == SINGLE_RECORD:
+            table_exists = True
+        else:
+            table_exists = False
+
+        logging.debug('Table exists? : {}'.format(table_exists))
         return table_exists
 
     @abc.abstractmethod
@@ -115,7 +141,7 @@ class SqliteDB(metaclass=abc.ABCMeta):
         pass
 
 
-class SecurityDB(SqliteDB):
+class SecuritySystemDB(SqliteDB):
     """
     DB for Security System node
     Methods
@@ -130,7 +156,7 @@ class SecurityDB(SqliteDB):
         Get all records from Table
     """
 
-    def __init__(self, db_file=SECURITY_SYSTEM_DB, name=SECURITY_SYSTEM_NAME):
+    def __init__(self, db_file=c.SECURITY_SYSTEM_DB, name=c.SECURITY_SYSTEM_NAME):
         """
         Initialize SecuritySystemDB
         Parameters
@@ -145,12 +171,17 @@ class SecurityDB(SqliteDB):
     def create_table(self):
         """
         Create table for SecuritySystemDB
+
+        Raises
+        ------
+        Exception
+            Invalid use of SqliteDB context manager
         """
         logging.debug('Creating new table')
         if not self._dbconnect or not self._cursor:
             raise Exception('Invalid call to Context Manager method!')
 
-        self._cursor.execute("create table {} (date text, time text)".format(self._name))
+        self._cursor.execute("create table {} (date text, time text, location text, nodeID text)".format(self._name))
 
     def add_record(self, record):
         """
@@ -159,13 +190,28 @@ class SecurityDB(SqliteDB):
         ----------
         record : dict
             Entry to add to DB
+
+        Raises
+        ------
+        Exception
+            Invalid use of SqliteDB context manager
+        Exception
+            Invalid SecuritySystemDB record
         """
         logging.debug('Adding new entry to table')
         if not self._dbconnect or not self._cursor:
             raise Exception('Invalid call to Context Manager method!')
 
-        self._cursor.execute("insert into {} values(?, ?)".format(self._name),
-            (record['date'], record['time']))
+        date = record.get('date', '')
+        time = record.get('time', '')
+        location = record.get('location', '')
+        node_id = record.get('nodeID', '')
+
+        if '' in (date, time, node_id, location):
+            raise Exception('Invalid SecuritySystemDB record!')
+
+        self._cursor.execute("insert into {} values(?, ?, ?, ?)".format(self._name),
+            (date, time, location, node_id))
 
     def record_exists(self, record):
         """
@@ -178,18 +224,27 @@ class SecurityDB(SqliteDB):
         -------
         record_exists : bool
             True if entry exists
+        Raises
+        ------
+        Exception
+            Invalid use of SqliteDB context manager
         """
+        record_exists = False
+
         logging.debug('Check if record exists in table')
         if not self._dbconnect or not self._cursor:
             raise Exception('Invalid call to Context Manager method!')
 
-        date = record['date']
-        time = record['time']
+        date = record.get('date', '')
+        time = record.get('time', '')
+        location = record.get('location', '')
+        node_id = record.get('nodeID', '')
 
         self._cursor.execute("""SELECT count(*) FROM {} WHERE \
-             date == ? and time = ?""".format(self._name), (date, time))
+             date == ? and time = ? and location = ? and nodeID = ?""".format(self._name), (date, time, location, node_id))
 
-        record_exists = True if self._cursor.fetchone()[0] == 1 else False
+        if self._cursor.fetchone()[FIRST_ROW] == SINGLE_RECORD:
+            record_exists = True
 
         logging.debug('Record exists? : {}'.format(record_exists))
         return record_exists
@@ -207,35 +262,139 @@ class SecurityDB(SqliteDB):
             raise Exception('Invalid call to Context Manager method!')
 
         self._cursor.execute("""SELECT * FROM {}""".format(self._name))
+        rows = self._cursor.fetchall()
 
-        for row in self._cursor:
-            print(row['date'],row['time'])
+        records = []
+        for r in rows:
+            record = {'date': r['date'],
+                      'time': r['time'],
+                      'location': r['location'],
+                      'nodeID': r['nodeID']}
+            logging.info('{}|{}|{}|{}'.format(r['date'],r['time'],r['location'],r['nodeID']))
+            records.append(record)
 
+        return records
 
-def security_system_db_test():
+def security_system_db_test(file_name, table_name, location, node_id):
     """
-    Creates a SecuritySystemDB object for manual
-    db verification
+    Creates a SecuritySystemDB object for manual db verification
+
+    Parameters
+    ----------
+    file_name : str
+        Name of test DB file
+    table : str
+        Name of test DB table
+    location : str
+        Name of test location
+    node_id : str
+        Name of test node ID
     """
 
-    with SecurityDB(db_file='test.db', name='test') as db_obj:
-        fake_date = datetime.now().date()
-        fake_time = datetime.now().strftime("%H:%M:%S")
+    default_date = '2020-11-23'
+    default_time_1 = '01:20:06'
+    default_time_2 = '12:24:51'
 
-        record = {'date': fake_date,
-                  'time': fake_time}
+    records = [{'date': default_date,
+                'time': default_time_1,
+                'location': location,
+                'nodeID': node_id},
+               {'date': default_date,
+                'time': default_time_2,
+                'location': location,
+                'nodeID': node_id}]
+    
+    logging.info('Records:')
+    for r in records:
+        logging.info('{}|{}|{}|{}'.format(r['date'],r['time'],r['location'],r['nodeID']))
 
+    with SecuritySystemDB(db_file=file_name, name=table_name) as db_obj:
+
+        logging.info('Checking & creating table if needed')
         if not db_obj.table_exists():
             db_obj.create_table()
 
-        if not db_obj.record_exists(record):
-            db_obj.add_record(record)
+        logging.info('Adding only the new records to table')
+        for r in records:
+            if not db_obj.record_exists(r):
+                db_obj.add_record(r)
 
+        logging.info('Retrieving all records')
         db_obj.get_records()
+    
+    logging.info('Open {cwd}/{f} in SQL Browser for verification'.format(
+        cwd=os.getcwd(), f=file_name))
+
+def parse_args():
+    """
+    Parses arguments for manual operation of the SecuritySystemDB
+    Returns
+    -------
+    args : Namespace
+        Populated attributes based on args
+    """
+    default_file_name = 'test.db'
+    default_table_name = 'test'
+    default_location = 'hasan_bedroom'
+    default_node_id = 'SecuritySystem_1'
+
+    parser = argparse.ArgumentParser(
+        description='Run the SecuritySystemDB test program')
+
+    parser.add_argument('-v',
+                        '--verbose',
+                        default=False,
+                        action='store_true',
+                        help='Print all debug logs')
+
+    parser.add_argument('-ss',
+                        '--security_system',
+                        default=False,
+                        action='store_true',
+                        help='Run SecuritySystemDB test')
+
+    parser.add_argument('-f',
+                        '--file_name',
+                        type=str,
+                        default=default_file_name,
+                        metavar='<file_name.db>',
+                        help='Specify file name of SQL db (Relative to pwd)')
+
+    parser.add_argument('-t',
+                        '--table_name',
+                        type=str,
+                        default=default_table_name,
+                        metavar='<test_table_name>',
+                        help='Specify table name of SQL db')
+
+    parser.add_argument('-l',
+                        '--location',
+                        type=str,
+                        default=default_location,
+                        metavar='<owner_room>',
+                        help='Specify owner and room')
+
+    parser.add_argument('-id',
+                        '--node_id',
+                        type=str,
+                        default=default_node_id,
+                        metavar='<node_id>',
+                        help='Specify node ID')
+
+    args = parser.parse_args()
+    return args
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        level=logging.DEBUG)
-    
-    security_system_db_test()
+    args = parse_args()
+    logging_level = logging.DEBUG if args.verbose else logging.INFO
+    logging.basicConfig(format=c.LOGGING_FORMAT, level=logging_level)
+
+    if args.security_system:
+        security_system_db_test(
+            args.file_name,
+            args.table_name,
+            args.location,
+            args.node_id)
+    else:
+        logging.error('No test DB specified!')
