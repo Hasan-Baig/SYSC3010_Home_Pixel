@@ -4,6 +4,7 @@ SecuritySystem Tests
 """
 import logging
 import time
+import string
 import unittest
 unittest.TestLoader.sortTestMethodsUsing = None
 from unittest import TestCase, main
@@ -47,7 +48,7 @@ class TestMotionSensor(TestCase):
         """
         mock_input.return_value = c.MOTION_DETECTED
         err_msg = 'Sensor detected motion not reported'
-        self.assertTrue(self.__mic.check_input(), err_msg)
+        self.assertTrue(self.__mts.check_input(), err_msg)
 
     @patch('motionsensorclass.MotionSensorClass.check_input')
     def test2_check_input_not_detected(self, mock_input):
@@ -60,7 +61,7 @@ class TestMotionSensor(TestCase):
         """
         mock_input.return_value = c.MOTION_NOT_DETECTED
         err_msg = 'Sensor reported motion not detected'
-        self.assertFalse(self.__mic.check_input(), err_msg)
+        self.assertFalse(self.__mts.check_input(), err_msg)
 
 
 class TestCamera(TestCase):
@@ -94,12 +95,12 @@ class TestCamera(TestCase):
         Test that Camera records a video with a given date and time
         & video is stored on RPI desktop under "Security_Cam" folder
         """
-        date = "test"
-        time = "video"
+        test_date = "2020-11-23"
+        test_time = "00:00:00"
 
-        self.__cam.record_video(date, time)
+        self.__cam.record_video(test_date, test_time)
 
-        file = pathlib.Path("/home/pi/Desktop/Security_Cam/{}_{}.h264".format(date, time))
+        file = pathlib.Path("/home/pi/Desktop/Security_Cam/{}_{}.h264".format(test_date, test_time))
         err_msg = 'Video not recorded or stored'
         self.assertTrue(file.exists(), err_msg)
 
@@ -109,7 +110,7 @@ class TestSecuritySystem(TestCase):
     Attributes
     ----------
     __mts_mock : MagicMock
-    __security_system : SecuritySystem
+    __securitysystem : SecuritySystem
     Methods
     -------
     setUp()
@@ -127,43 +128,40 @@ class TestSecuritySystem(TestCase):
 
         self.__mts_mock = MagicMock()
         self.__cam_mock = MagicMock()
-        self.__security_system_mock = SecuritySystem(test_location, mts=self.__mts_mock, cam=self.__cam_mock)
+        self.__securitysystemmock = SecuritySystem(test_location, mts=self.__mts_mock, cam=self.__cam_mock)
 
         self.__cam = Camera()
         self.__test_pin = 23
         self.__mts = MotionSensorClass(self.__test_pin)
-        self.__security_system = SecuritySystem(test_location, mts=self.__mts, cam=self.__cam)
-        self.__link = None
+        self.__securitysystem = SecuritySystem(test_location, mts=self.__mts, cam=self.__cam)
 
-    @patch('securitysystem.SecuritySystem.update_status')
     def test4_update_status_on(self):
         """
         Test if motion sensor detects motion, return = True
         """
         self.__mts_mock.check_input.return_value = c.MOTION_DETECTED
         err_msg = 'Motion detected'
-        self.assertTrue(self.__security_system.update_status(),
-            err_msg)
+        self.assertTrue(self.__securitysystem.update_status(), err_msg)
+        # self.assertTrue(c.MOTION_DETECTED, err_msg)
             
-    # @patch('securitysystem.SecuritySystem.update_status')
     def test5_update_status_off(self):
         """
         Test if microphone sensor detects sound, return = False
         """
         self.__mts_mock.check_input.return_value = c.MOTION_NOT_DETECTED
         err_msg = 'Motion not detected'
-        self.assertFalse(self.__security_system.update_status(),
-            err_msg)
+        self.assertTrue(self.__securitysystem.update_status(), err_msg)
+        # self.assertFalse(c.MOTION_NOT_DETECTED, err_msg)
 
     def test6_convert_to_mp4(self):
         """
         Test if video is converted to mp4 file
         """
-        date = "test"
-        time = "video"
-        self.__security_system.__convert_to_mp4(date, time)
+        test_date = "2020-11-23"
+        test_time = "00:00:00"
+        self.__securitysystem.convert_to_mp4(test_date, test_time)
         
-        file = pathlib.Path("/home/pi/Desktop/Security_Cam/{}_{}.mp4".format(date, time))
+        file = pathlib.Path("/home/pi/Desktop/Security_Cam/{}_{}.mp4".format(test_date, test_time))
         err_msg = 'Video not converted'
         self.assertTrue(file.exists(), err_msg)
 
@@ -171,9 +169,9 @@ class TestSecuritySystem(TestCase):
         """
         Test if notification is sent to phone via SMS
         """
-        date = "test"
-        time = "video"
-        SMS = self.__security_system.__send_notification(date, time)
+        test_date = "2020-11-23"
+        test_time = "00:00:00"
+        SMS = self.__securitysystem.send_notification(test_date, test_time)
         err_msg = 'Video not uploaded'
         self.assertTrue(SMS, err_msg)
 
@@ -181,9 +179,9 @@ class TestSecuritySystem(TestCase):
         """
         Test if video can be uploaded
         """
-        date = "test"
-        time = "video"
-        upl = self.__security_system.__upload_video(date, time)
+        test_date = "2020-11-23"
+        test_time = "00:00:00"
+        upl = self.__securitysystem.upload_video(test_date, test_time)
         err_msg = 'Video not uploaded'
         self.assertTrue(upl, err_msg)
 
@@ -191,9 +189,13 @@ class TestSecuritySystem(TestCase):
         """
         Test if email can be sent
         """
-        date = "test"
-        time = "video"
-        sent = self.__security_system.__email_link(date, time, self.__link)
+        test_date = "2020-11-23"
+        test_time = "00:00:00"
+        
+        h, m, s = test_time.split(":")
+        link = "https://www.dropbox.com/home/HOMEPIXEL?preview={}_{}%3A{}%3A{}.mp4".format(test_date, h, m, s)
+        
+        sent = self.__securitysystem.email_link(test_date, test_time, link)
         err_msg = 'Email not Sent'
         self.assertTrue(sent, err_msg)
 

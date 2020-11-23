@@ -1,1 +1,0 @@
-# lightclapper unit tests
