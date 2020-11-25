@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 """
-Polls the motion sensor to upload to ThingSpeak and record video
+Polls the motion sensor to upload to ThingSpeak, records video, converts
+to mp4 format, sends SMS notification to user, uploads to Dropbox
+and emails access link to gmail
 """
 
 import time
@@ -16,6 +18,7 @@ import argparse
 import logging
 import constants as c
 
+#Magic numbers (constants)
 DEFAULT_ID = 0
 POLL_TIME_SECS = 0.5 
 POLLING = True
@@ -136,12 +139,6 @@ class SecuritySystem:
             self.__cam.record_video(result[1], result[2])
             self.convert_to_mp4(result[1], result[2])
         return result[0], result[1], result[2]
-    
-    #extra
-    def updateStatusMotion(self):
-        if(self.__mts.motionDetected()):
-            return True
-        return False
 
     def convert_to_mp4(self, date, time):
         """
@@ -221,10 +218,8 @@ class SecuritySystem:
 
             if responseData["messages"][0]["status"] == "0":
                 logging.debug("Message sent successfully.")
-                return True
             else:
                 logging.debug("Message failed with error: {}".format(responseData['messages'][0]['error-text']))
-                return False
 
         except BaseException as e:
             print('An error or exception occurred: ' + str(e))
@@ -246,12 +241,11 @@ class SecuritySystem:
             upl = "{} upload {} /HOMEPIXEL".format(uploadPath, vidfile)   
             call ([upl], shell=True)  
 
-            #in the URL, ":" = %3A
+            #According to URL syntax ":" = %3A
             h, m, s = time.split(":")
             self.__link = "https://www.dropbox.com/home/HOMEPIXEL?preview={}_{}%3A{}%3A{}.mp4".format(date, h, m, s)
             
             logging.debug("Video uploaded successfully!")
-            return True
         
         except BaseException as e:
             print('An error or exception occurred: ' + str(e))
@@ -269,10 +263,6 @@ class SecuritySystem:
             Time when motion detected
         link : str
             Dropbox access link of video
-        Returns
-        -------
-        True
-            if email sent successfully
         """
         try:
             #Create Headers
@@ -297,8 +287,6 @@ class SecuritySystem:
             session.quit
 
             logging.debug("Email sent successfully!")
-
-            return True
         
         except BaseException as e:
             print('An error or exception occurred: ' + str(e))
