@@ -4,19 +4,31 @@ import time
 from fan import Fan
 from temp import Temperature
 from thingspeakwriter import ThingSpeakWriter
-from thingspeakinfo import WRITE_KEY_D1, GOOD_STATUS
+import thingspeakinfo as c
 import argparse
 import logging
 
 POLL_TIME_SEC = 10
 THRESHOLD = 25
-#THRESHOLD = 10
+DEFAULT_ID = 0
+ID_INCREMENT = 1
+
 
 class TempSensor:
-	def __init__(self, temp=Temperature(), fan=Fan(), writer = ThingSpeakWriter(WRITE_KEY_D1)):
+	temp_sensor_id = DEFAULT_ID
+
+	def __init__(self, location, tval, temp=Temperature(), fan=Fan(), write = False, write_key = ThingSpeakWriter(c.WRITE_KEY_D1)):
+		TempSensor.temp_sensor_id += ID_INCREMENT
+		self.__node_id = '{node}_{id}'.format(
+		    node = c.TEMP_SENSOR_NAME,
+		    id = TempSensor.temp_sensor_id)
+
+		self.__location = location
+		self.__tval = tval
 		self.__temp = temp
 		self.__fan = fan
-		self.__writer = writer
+		self.__write_mode = write
+		self.__writer = ThingSpeakWriter(write_key) if write else None
 
 	def poll(self):
 		try:
@@ -54,11 +66,18 @@ class TempSensor:
 		return checkingtemp
 
 	def __write_to_channel(self, tempDetected):
-		status = 1 if self.__fan.get_status() else 0
-		fields = {"field1": status}
+		tval = self.__tval.update_status()
+		fan_status = 0
+		if self.__fan.get_status() == 1:
+			fan_status = 1
+
+		fields = {c.LOCATION_FIELD: self.__location,
+			  c.NODE_ID_FIELD: self.__node_id,
+			  c.FAN_STATUS_FIELD: fan_status,
+			  c.TEMP_VAL_FIELD: tval}
 		status, reason = self.__writer.write(fields)
-		if status != GOOD_STATUS:
-			raise Exception("Write was unsuccesful")
+		if status != c.GOOD_STATUS:
+			logging.error('Write to Thingspeak Channel was unsuccessful')
 
 def parse_args():
 	parser = argparse.ArgumentParser(description = "Run the TempSensor Program (CTRL-C to Exit)")
@@ -74,13 +93,20 @@ def parse_args():
 			    action = "store_true",
 			    help = "Print all debug logs")
 
+	parser.add_argument('-l',
+			    '--location',
+			    type=str,
+			    required = True,
+			    metavar='<owner_room>',
+			    help = 'Specify owner and room')
+
 	args = parser.parse_args()
 	return args
 
 if __name__ == "__main__":
 	args = parse_args()
 	logging_level = logging.DEBUG if args.verbose else logging.INFO
-	logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level = logging_level)
+	logging.basicConfig(format=c.LOGGING_FORMAT, level = logging_level)
 
-	temp_sensor = TempSensor()
+	temp_sensor = TempSensor(args.location, write=args.write)
 	temp_sensor.poll()
