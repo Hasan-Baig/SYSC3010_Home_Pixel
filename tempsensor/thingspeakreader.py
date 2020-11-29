@@ -3,28 +3,66 @@
 import requests
 import logging
 import json
-from thingspeakinfo import (READ_KEY_D1, FEED_D1, READ_KEY_D2, FEED_D2, READ_URL)
+import argparse
+import thingspeakinfo as c
 
 class ThingSpeakReader():
-	def __init__(self, key=READ_KEY_D1, feed=FEED_D1):
+	def __init__(self, key=c.READ_KEY_D1, feed=c.FEED_D1):
 		self.__key = key
 		self.__feed = feed
 
-	def read_from_channel(self, header = 2):
-		read_url = READ_URL.format(CHANNEL_FEED = self.__feed, READ_KEY = self.__key, HEADER = header)
+	def read_from_channel(self, num_entries=None):
+		if num_entries:
+			read_url = c.READ_URL_LIMITED.format(
+				CHANNEL_FEED = self.__feed,
+				READ_KEY = self.__key,
+				RESULTS = num_entries)
+		else:
+			read_url = c.READ_URL.format(
+				CHANNEL_FEED = self.__feed,
+				READ_KEY = self.__key)
+
 		fields = requests.get(read_url).json()
 		return fields
 
 def read_test():
-	reader = ThingSpeakReader(key = READ_KEY_D2, feed = FEED_D2)
-#	reader = ThingSpeakReader(key = READ_KEY_D1, feed = FEED_D1)
-	fields = reader.read_from_channel()
-	logging.debug(fields)
-	read_url = READ_URL.format(CHANNEL_FEED = FEED_D2, READ_KEY = READ_KEY_D2, HEADER = 2)
-#	read_url = READ_URL.format(CHANNEL_FEED = FEED_D1, READ_KEY = READ_KEY_D2, HEADER = 2)
-	logging.debug("Check Results --> {}".format(read_url))
+	logging.info('Reading last {} feed entries'.format(number_of_entries))
+
+	reader = ThingSpeakReader(c.READ_KEY_D2, c.FEED_D2)
+	fields = reader.read_from_channel(num_entries = number_of_entries)
+	for f in fields.get('feeds', []):
+		logging.info(f)
+
+	read_url = c.READ_URL_LIMITED.format(
+		CHANNEL_FEED = c.FEED_D2,
+		RESULTS = number_of_entries)
+	logging.info('Compare read data with results here: {}'.format(read_url))
+
+def parse_args():
+	default_test_results = 10
+
+	parser = argparse.ArgumentParser(
+		description = 'Run the ThingSpeakReader test program')
+
+	parser.add_argument('-v',
+			    '--verbose',
+			    default = False,
+			    action = 'store_true',
+			    help = 'Print all debug logs')
+
+	parser.add_argument('-n',
+			    '--number',
+			    default = default_test_results,
+			    type = int,
+			    metavar = '<number_of_results>',
+			    help = '# of entries to read from ThingSpeak Channel')
+
+	args = parser.parse_args()
+	return args
 
 if __name__ == "__main__":
-	logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level = logging.DEBUG)
-	read_test()
+	args = parse_args()
+	logging_level = logging.DEBUG if args.verbose else logging.INFO
+	logging.basicConfig(format = c.LOGGIN_FORMAT, level = logging_level)
+	read_test(args.number)
 

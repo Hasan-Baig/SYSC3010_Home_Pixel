@@ -2,9 +2,10 @@
 
 import http.client
 import urllib
+import random
 import logging
+import thingspeakinfo as c
 from datetime import datetime
-from thingspeakinfo import (WRITE_KEY_D2, READ_KEY_D2, FEED_D2, READ_URL)
 
 class ThingSpeakWriter():
 	def __init__(self, key):
@@ -16,7 +17,7 @@ class ThingSpeakWriter():
 		reason = None
 		params = urllib.parse.urlencode(fields)
 
-		logging.debug('Fields: {}'.format(fields))
+		logging.debug('Fields to write: {}'.format(fields))
 
 		headers = {"Content-typeZZe": "application/x-www-form-urlencoded", "Accept": "text/plain"}
 		conn = http.client.HTTPConnection("api.thingspeak.com:80")
@@ -27,22 +28,26 @@ class ThingSpeakWriter():
 			status = response.status
 			reason = response.reason
 			conn.close()
-		except:
-			print ("Connection Failed")
+		except Exception:
+			logging.error("Connection Failed")
 
-		logging.debug('{0}, {1}'.format(status, reason))
+		logging.debug('{response_status}, {response_reason}'.format(
+			response_status = status,
+			response_reason = reason))
 		return status, reason
 
 def write_test():
-	writer = ThingSpeakWriter(WRITE_KEY_D2)
+	writer = ThingSpeakWriter(c.WRITE_KEY_D2)
 	test_data = datetime.now()
-	fields = {"field1" : test_data}
+	fields = {c.TEST_FIELD: test_data}
 
-	logging.debug("Writing {} to field1".format(test_data))
+	logging.debug("Writing {data} to {field}".format(
+		data=test_data,
+		field = c.TEST_FIELD))
 	writer.write(fields)
 
-	read_url = READ_URL.format(CHANNEL_FEED = FEED_D2, READ_KEY = READ_KEY_D2, HEADER = 2)
-	logging.debug("Check results here --> {}".format(read_url))
+	read_url = READ_URL.format(CHANNEL_FEED = c.FEED_D2, READ_KEY = c.READ_KEY_D2)
+	logging.info("Check results here --> {}".format(read_url))
 
 if __name__ == "__main__":
 	logging.basicConfig(format = "%(asctime)s - %(levelname)s - %(message)s", level = logging.DEBUG)
