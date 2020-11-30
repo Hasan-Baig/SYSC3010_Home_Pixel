@@ -16,15 +16,14 @@ ID_INCREMENT = 1
 
 class TempSensor:
 	temp_sensor_id = DEFAULT_ID
-
-	def __init__(self, location, tval, temp=Temperature(), fan=Fan(), write = False, write_key = ThingSpeakWriter(c.WRITE_KEY_D1)):
+	def __init__(self, location, temp=Temperature(), fan=Fan(), write=False, write_key=ThingSpeakWriter(c.WRITE_KEY_D1)):
 		TempSensor.temp_sensor_id += ID_INCREMENT
 		self.__node_id = '{node}_{id}'.format(
 		    node = c.TEMP_SENSOR_NAME,
 		    id = TempSensor.temp_sensor_id)
 
 		self.__location = location
-		self.__tval = tval
+#		self.__tval = tval
 		self.__temp = temp
 		self.__fan = fan
 		self.__write_mode = write
@@ -34,11 +33,21 @@ class TempSensor:
 		try:
 			while True:
 				tempDetected = self.update_status()
-				if tempDetected > THRESHOLD:
-					self.__write_to_channel(tempDetected)
-				if tempDetected <= THRESHOLD:
-					self.__write_to_channel(tempDetected)
 
+#				if tempDetected > THRESHOLD:
+#					self.__write_to_channel(tempDetected, tval)
+#					self.__write_to_channel(tval)
+#				if tempDetected <= THRESHOLD:
+#					self.__write_to_channel(tempDetected, tval)
+#					self.__write_to_channel(tval)
+
+
+				if tempDetected > THRESHOLD:
+					if self.__write_mode:
+						self.__write_status_to_channel()
+				if tempDetected < THRESHOLD:
+					if self.__write_mode:
+						self.__write_status_to_channel()
 				sleep_time = POLL_TIME_SEC if tempDetected else 0
 				time.sleep(sleep_time)
 		except KeyboardInterrupt:
@@ -56,17 +65,19 @@ class TempSensor:
 		if checkingtemp > THRESHOLD:
 			print ("ROOM TOO HOT - TURNING ON")
 			self.__fan.hot_status(True)
+#			self.__write_to_channel(checkingtemp)
 		if checkingtemp <= THRESHOLD:
 			print ("ROOM TOO COLD - TURNING OFF")
 			self.__fan.cold_status(True)
+#			self.__write_to_channel(checkingtemp)
 		return checkingtemp
 
 	def checking_status(self):
 		checkingtemp = self.__temp.read_data()
 		return checkingtemp
 
-	def __write_to_channel(self, tempDetected):
-		tval = self.__tval.update_status()
+	def __write_status_to_channel(self):
+		tval = self.__temp.read_data()
 		fan_status = 0
 		if self.__fan.get_status() == 1:
 			fan_status = 1
@@ -75,7 +86,8 @@ class TempSensor:
 			  c.NODE_ID_FIELD: self.__node_id,
 			  c.FAN_STATUS_FIELD: fan_status,
 			  c.TEMP_VAL_FIELD: tval}
-		status, reason = self.__writer.write(fields)
+
+		status, reason = self.__writer.write_to_channel(fields)
 		if status != c.GOOD_STATUS:
 			logging.error('Write to Thingspeak Channel was unsuccessful')
 

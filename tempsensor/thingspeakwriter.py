@@ -11,7 +11,7 @@ class ThingSpeakWriter():
 	def __init__(self, key):
 		self.__key = key
 
-	def write(self, fields):
+	def write_to_channel(self, fields):
 		fields['key'] = self.__key
 		status = None
 		reason = None
@@ -44,7 +44,7 @@ def write_test():
 	logging.debug("Writing {data} to {field}".format(
 		data=test_data,
 		field = c.TEST_FIELD))
-	writer.write(fields)
+	writer.write_to_channel(fields)
 
 	read_url = READ_URL.format(CHANNEL_FEED = c.FEED_D2, READ_KEY = c.READ_KEY_D2)
 	logging.info("Check results here --> {}".format(read_url))

@@ -78,7 +78,7 @@ class TempSensorClient:
 			logging.warning('Skipping entry with unparseable date')
 			return False, data
 		elif '' in [location, node_id]:
-			logging.warning('Skipping entry iwth missing fields')
+			logging.warning('Skipping entry with missing fields')
 			return False, data
 		elif fan_status not in [0, 1]:
 			logging.warning('Skipping entry with invalid fan status')
@@ -86,7 +86,7 @@ class TempSensorClient:
 
 		data = {'date': date_list[DATE_INDEX],
 			'time': date_list[TIME_INDEX],
-			'locaiton': location,
+			'location': location,
 			'nodeID': node_id,
 			'fanStatus': fan_status,
 			'tempVal': tval}
