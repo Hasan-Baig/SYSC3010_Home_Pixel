@@ -28,9 +28,9 @@ class TempSensorClient:
 		try:
 			while True:
 				channel_data = self.read_from_channel()
-			if channel_data:
-				self.__add_data_from_channel(channel_data)
-			time.sleep(POLL_TIME_SECS)
+				if channel_data:
+					self.__add_data_from_channel(channel_data)
+				time.sleep(POLL_TIME_SECS)
 		except KeyboardInterrupt:
 			logging.info('Exiting due to keyboard interrupt')
 		except BaseException as e:
@@ -41,7 +41,7 @@ class TempSensorClient:
 		parsed_data = []
 		read_data = self.__reader.read_from_channel()
 		feeds = read_data.get('feeds', '')
-
+#		print (feeds)
 		if not feeds or feeds[LAST_INDEX] == self.__latest_data:
 			logging.debug('No new data parsed fromm channel')
 			return parsed_data
@@ -69,9 +69,9 @@ class TempSensorClient:
 
 		try:
 			fan_status = int(feed.get(c.FAN_STATUS_FIELD, ''))
-			tval = int(feed.get(c.TEMP_VAL_FIELD, ''))
+			temp_val = float(feed.get(c.TEMP_VAL_FIELD, ''))
 		except ValueError:
-			logging.warning('Skipping entry iwth invalid fan and temp val type')
+			logging.warning('Skipping entry with invalid fan and temp val type')
 			return False, data
 
 		if len(date_list) < DATE_LIST_LENGTH:
@@ -89,7 +89,7 @@ class TempSensorClient:
 			'location': location,
 			'nodeID': node_id,
 			'fanStatus': fan_status,
-			'tempVal': tval}
+			'tempVal': temp_val}
 
 		logging.debug('Data parsed from channel: {}'.format(data))
 		return True, data

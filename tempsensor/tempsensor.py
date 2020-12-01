@@ -8,7 +8,7 @@ import thingspeakinfo as c
 import argparse
 import logging
 
-POLL_TIME_SEC = 10
+POLL_TIME_SEC = 5
 THRESHOLD = 25
 DEFAULT_ID = 0
 ID_INCREMENT = 1
@@ -16,45 +16,43 @@ ID_INCREMENT = 1
 
 class TempSensor:
 	temp_sensor_id = DEFAULT_ID
-	def __init__(self, location, temp=Temperature(), fan=Fan(), write=False, write_key=ThingSpeakWriter(c.WRITE_KEY_D1)):
+	def __init__(self, location, temp=Temperature(), fan=Fan(), write=False, write_key=c.WRITE_KEY_D1):
 		TempSensor.temp_sensor_id += ID_INCREMENT
 		self.__node_id = '{node}_{id}'.format(
 		    node = c.TEMP_SENSOR_NAME,
 		    id = TempSensor.temp_sensor_id)
 
 		self.__location = location
-#		self.__tval = tval
 		self.__temp = temp
 		self.__fan = fan
 		self.__write_mode = write
-		self.__writer = ThingSpeakWriter(write_key) if write else None
+		self.__writer = ThingSpeakWriter(write_key)
+# if write else None
 
 	def poll(self):
+		logging.info('TempSensor Program running')
+		logging.info('Writing to channel mode enabled?: {}'.format(self.__write_mode))
+
 		try:
 			while True:
 				tempDetected = self.update_status()
+				self.__write_status_to_channel()
 
 #				if tempDetected > THRESHOLD:
-#					self.__write_to_channel(tempDetected, tval)
-#					self.__write_to_channel(tval)
-#				if tempDetected <= THRESHOLD:
-#					self.__write_to_channel(tempDetected, tval)
-#					self.__write_to_channel(tval)
+#					if self.__write_mode:
+#						self.__write_status_to_channel()
+#				if tempDetected < THRESHOLD:
+#					if self.__write_mode:
+#						self.__write_status_to_channel()
 
-
-				if tempDetected > THRESHOLD:
-					if self.__write_mode:
-						self.__write_status_to_channel()
-				if tempDetected < THRESHOLD:
-					if self.__write_mode:
-						self.__write_status_to_channel()
 				sleep_time = POLL_TIME_SEC if tempDetected else 0
 				time.sleep(sleep_time)
+
 		except KeyboardInterrupt:
-			print ("Exiting")
+			logging.info ("Exiting")
 		except BaseException as e:
-			print (e.message)
-			print ("An error or exception occured!")
+			logging.error (e.message)
+			logging.error ("An error or exception occured!")
 		finally:
 			self.__fan.cold_status(True)
 			GPIO.cleanup()
@@ -77,6 +75,7 @@ class TempSensor:
 		return checkingtemp
 
 	def __write_status_to_channel(self):
+		print ("enter fucntion")
 		tval = self.__temp.read_data()
 		fan_status = 0
 		if self.__fan.get_status() == 1:
@@ -86,7 +85,7 @@ class TempSensor:
 			  c.NODE_ID_FIELD: self.__node_id,
 			  c.FAN_STATUS_FIELD: fan_status,
 			  c.TEMP_VAL_FIELD: tval}
-
+		print (fields)
 		status, reason = self.__writer.write_to_channel(fields)
 		if status != c.GOOD_STATUS:
 			logging.error('Write to Thingspeak Channel was unsuccessful')

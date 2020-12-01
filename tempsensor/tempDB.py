@@ -73,9 +73,9 @@ class TempDB(SqliteDB):
 	            raise Exception('Invalid call to Context Manager method!')
 
 		self._cursor.execute(
-			"Create Table {} (date text, \
+			"create table {} (date text, \
 			 time text, location text, nodeID text, \
-			 fanStatus integer, tempVal integer)".format(self._name))
+			 fanStatus integer, tempVal float)".format(self._name))
 
 	def add_record(self, record):
 		logging.debug('Adding new entry to table')
@@ -89,7 +89,7 @@ class TempDB(SqliteDB):
 		fan_status = record.get('fanStatus', '')
 		temp_val = record.get('tempVal', '')
 
-		if '' in (date, time, node_id, locaiton, fan_status, temp_val):
+		if '' in (date, time, node_id, location, fan_status, temp_val):
 			raise Exception('Invalid TempSensorDB record!')
 
 		self._cursor.execute(
@@ -111,8 +111,12 @@ class TempDB(SqliteDB):
 		temp_val = record.get('tempVal', '')
 
 		self._cursor.execute(
+                        """SELECT * FROM {} """.format(self._name))
+		print (self._cursor.fetchall())
+
+		self._cursor.execute(
 			"""SELECT count(*) FROM {} WHERE \
-				date == ? and time = ? and location == ? and nodeID == ? \
+				date == ? and time = ? and location = ? and nodeID = ? \
 				and fanStatus = ? and tempVal = ?""".format(self._name), (date, time, location, node_id, fan_status, temp_val))
 
 		if self._cursor.fetchone()[FIRST_ROW] == SINGLE_RECORD:
@@ -134,7 +138,7 @@ class TempDB(SqliteDB):
 				  'nodeID': r['nodeID'],
 				  'fanStatus': r['fanStatus'],
 				  'tempVal': r['tempVal']}
-			record.append(record)
+			records.append(record)
 
 		return records
 
@@ -156,8 +160,8 @@ def temp_sensor_db_test(file_name, table_name, location, node_id):
 	default_date = '2020-11-21'
 	default_time_1 = '14:35:32'
 	default_time_2 = '23:12:45'
-	default_temp_val = '20'
-	default_temp_val_2 = '30'
+	default_temp_val = 23.2
+	default_temp_val_2 = 43.2
 
 	records = [{'date': default_date,
 		    'time': default_time_1,
