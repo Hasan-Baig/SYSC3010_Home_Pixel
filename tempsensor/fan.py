@@ -6,20 +6,35 @@ import logging
 import RPi.GPIO as GPIO
 from time import sleep
 
-FAN_PIN = 23
+FAN_PIN = 23 #FAN pin on RPi
 FAN_TEST_TIME = 5
 
 class Fan:
+	"""
+	Class to represent Fan Actuator
+	"""
+
 	def __init__(self, pin=FAN_PIN):
+		"""
+		Initialize Fan
+		"""
+
 		self.__pin = pin
 		GPIO.setmode(GPIO.BCM)
 		GPIO.setwarnings(False)
 		GPIO.setup(self.__pin, GPIO.OUT)
 
 	def get_status(self):
+		"""
+		Returns status of Fan
+		"""
 		return self.__fan_on
 
 	def hot_status(self, status):
+		"""
+		Method will turn the Fan ON when called
+		"""
+
 		output_gpio = GPIO.HIGH
 		GPIO.output(self.__pin, output_gpio)
 
@@ -36,6 +51,9 @@ class Fan:
 		self.__fan_on = status
 
 	def cold_status(self, status):
+		"""
+		Method will turn the Fan OFF when called
+		"""
 		output_gpio = GPIO.LOW
 		GPIO.output(self.__pin, output_gpio)
 

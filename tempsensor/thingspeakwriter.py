@@ -12,6 +12,10 @@ class ThingSpeakWriter():
 		self.__key = key
 
 	def write_to_channel(self, fields):
+		"""
+		Writing to the thingspeak channel
+		"""
+
 		fields['key'] = self.__key
 		status = None
 		reason = None

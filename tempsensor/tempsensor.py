@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import RPi.GPIO as GPIO
 import time
 from fan import Fan
@@ -13,10 +14,14 @@ THRESHOLD = 25
 DEFAULT_ID = 0
 ID_INCREMENT = 1
 
-
 class TempSensor:
 	temp_sensor_id = DEFAULT_ID
-	def __init__(self, location, temp=Temperature(), fan=Fan(), write=False, write_key=c.WRITE_KEY_D1):
+
+	def __init__(self, location, temp=Temperature(), fan=Fan(), write=True, write_key=c.WRITE_KEY_D1):
+		"""
+		Initializes the attributes
+		"""
+
 		TempSensor.temp_sensor_id += ID_INCREMENT
 		self.__node_id = '{node}_{id}'.format(
 		    node = c.TEMP_SENSOR_NAME,
@@ -27,23 +32,21 @@ class TempSensor:
 		self.__fan = fan
 		self.__write_mode = write
 		self.__writer = ThingSpeakWriter(write_key)
-# if write else None
 
 	def poll(self):
+		"""
+		Poll for temperature readings.
+		Update Fan based on temp input.
+		Write update to ThingSpeak channel.
+		"""
+
 		logging.info('TempSensor Program running')
 		logging.info('Writing to channel mode enabled?: {}'.format(self.__write_mode))
 
 		try:
 			while True:
 				tempDetected = self.update_status()
-				self.__write_status_to_channel()
-
-#				if tempDetected > THRESHOLD:
-#					if self.__write_mode:
-#						self.__write_status_to_channel()
-#				if tempDetected < THRESHOLD:
-#					if self.__write_mode:
-#						self.__write_status_to_channel()
+				self.__write_status_to_channel() #Always writing to channel when temperature is detected
 
 				sleep_time = POLL_TIME_SEC if tempDetected else 0
 				time.sleep(sleep_time)
@@ -54,28 +57,38 @@ class TempSensor:
 			logging.error (e.message)
 			logging.error ("An error or exception occured!")
 		finally:
-			self.__fan.cold_status(True)
-			GPIO.cleanup()
+			self.__fan.cold_status(True) #Set the Fan to OFF when program ends 
+			GPIO.cleanup() #Cleanup GPIO
 
 	def update_status(self):
-		checkingtemp = self.__temp.read_data()
-		print ("Temperature Value: " + str(checkingtemp))
+		"""
+		Checking for temperature values
+		"""
+
+		checkingtemp = self.__temp.read_data() #Reading data from temperature sensor
+		logging.info ("Temperature Value: " + str(checkingtemp))
+
+		#Checking to see if the temperature value is greater or less than the set Threshold value
 		if checkingtemp > THRESHOLD:
-			print ("ROOM TOO HOT - TURNING ON")
-			self.__fan.hot_status(True)
-#			self.__write_to_channel(checkingtemp)
+			logging.info ("ROOM TOO HOT - TURNING ON")
+			self.__fan.hot_status(True) #If greater, then fan turns ON
 		if checkingtemp <= THRESHOLD:
-			print ("ROOM TOO COLD - TURNING OFF")
-			self.__fan.cold_status(True)
-#			self.__write_to_channel(checkingtemp)
+			logging.info ("ROOM TOO COLD - TURNING OFF")
+			self.__fan.cold_status(True) #If less, then fan turns OFF
 		return checkingtemp
 
 	def checking_status(self):
+		"""
+		Returning a temperature value
+		"""
 		checkingtemp = self.__temp.read_data()
 		return checkingtemp
 
 	def __write_status_to_channel(self):
-		print ("enter fucntion")
+		"""
+		Write status of TempSensor to channel
+		"""
+
 		tval = self.__temp.read_data()
 		fan_status = 0
 		if self.__fan.get_status() == 1:
@@ -85,12 +98,16 @@ class TempSensor:
 			  c.NODE_ID_FIELD: self.__node_id,
 			  c.FAN_STATUS_FIELD: fan_status,
 			  c.TEMP_VAL_FIELD: tval}
-		print (fields)
+
 		status, reason = self.__writer.write_to_channel(fields)
 		if status != c.GOOD_STATUS:
 			logging.error('Write to Thingspeak Channel was unsuccessful')
 
 def parse_args():
+	"""
+	Parses arguments for manual operation of the TempSensor
+	"""
+
 	parser = argparse.ArgumentParser(description = "Run the TempSensor Program (CTRL-C to Exit)")
 	parser.add_argument("-w",
 			    "--write",

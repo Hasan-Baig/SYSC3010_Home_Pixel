@@ -10,23 +10,37 @@ FIRST_ROW = 0
 SINGLE_RECORD = 1
 
 class SqliteDB(metaclass=abc.ABCMeta):
+	"""
+	DB to store data
+	"""
+
 	def __init__(self, db_file, name):
+		"""
+		Initializes TempDB Context Manager
+		"""
+
 		self._db_file = db_file
 		self._name = name
 		self._dbconnect = None
 		self._cursor = None
 
 	def __enter__(self):
+		"""
+		DB context manager entry
+		"""
 		self.manual_enter()
 		return self
 
 	def __exit__(self, exception, value, trace):
+		"""
+		DB context manager exit
+		"""
 		self.manual_exit()
 
 	def manual_enter(self):
 		self._dbconnect = sqlite3.connect(self._db_file)
-		self._dbconnect.row_factory = sqlite3.Row
-		self._cursor = self._dbconnect.cursor()
+		self._dbconnect.row_factory = sqlite3.Row #Set row_factory to access columns by name
+		self._cursor = self._dbconnect.cursor() #Create a cursor to work with the db
 
 	def manual_exit(self):
 		self._dbconnect.commit()
@@ -35,6 +49,11 @@ class SqliteDB(metaclass=abc.ABCMeta):
 		self._cursor = None
 
 	def table_exists(self):
+		"""
+		Checking if table exists
+		"""
+
+		#Checking if table already exists
 		self._cursor.execute("SELECT count(name) FROM sqlite_master WHERE \
 			       type = 'table' AND name = '{}'".format(self._name))
 
@@ -64,24 +83,38 @@ class SqliteDB(metaclass=abc.ABCMeta):
 
 
 class TempDB(SqliteDB):
+	"""
+	Database for TempDB node
+	"""
+
 	def __init__(self, db_file=c.TEMP_SENSOR_DB_FILE, name=c.TEMP_SENSOR_TABLE):
         	super().__init__(db_file, name)
 
 	def create_table(self):
+		"""
+		Creating a table for TempSensorDB
+		"""
+
 		logging.debug('Creating new table')
 		if not self._dbconnect or not self._cursor:
 	            raise Exception('Invalid call to Context Manager method!')
 
+		#Storing a table with the fields date / time / location / nodeID / fanStatus / temperature value
 		self._cursor.execute(
 			"create table {} (date text, \
 			 time text, location text, nodeID text, \
 			 fanStatus integer, tempVal float)".format(self._name))
 
 	def add_record(self, record):
+		"""
+		Adding data to the TempSensorDB Table
+		"""
+
 		logging.debug('Adding new entry to table')
 		if not self._dbconnect or not self._cursor:
 			raise Exception('Invalid call to context Manager method!')
 
+		#Fields being stored
 		date = record.get('date', '')
 		time = record.get('time', '')
 		location = record.get('location', '')
@@ -97,6 +130,10 @@ class TempDB(SqliteDB):
 			(date, time, location, node_id, fan_status, temp_val))
 
 	def record_exists(self, record):
+		"""
+		Checking if records exist already in the table
+		"""
+
 		record_exists = False
 
 		logging.debug('Check if record exists in table')
@@ -111,10 +148,6 @@ class TempDB(SqliteDB):
 		temp_val = record.get('tempVal', '')
 
 		self._cursor.execute(
-                        """SELECT * FROM {} """.format(self._name))
-		print (self._cursor.fetchall())
-
-		self._cursor.execute(
 			"""SELECT count(*) FROM {} WHERE \
 				date == ? and time = ? and location = ? and nodeID = ? \
 				and fanStatus = ? and tempVal = ?""".format(self._name), (date, time, location, node_id, fan_status, temp_val))
@@ -126,6 +159,10 @@ class TempDB(SqliteDB):
 		return record_exists
 
 	def get_records(self):
+		"""
+		Returning all records in Table
+		"""
+
 		logging.debug("Return all records in table")
 		records = []
 		self._cursor.execute("SELECT * FROM {}".format(self._name))
@@ -197,6 +234,7 @@ def temp_sensor_db_test(file_name, table_name, location, node_id):
 
 	logging.info('Open {cwd}/{f} in SQL Browser for verificaiton'.format(
 		cwd=os.getcwd(), f=file_name))
+
 def parse_args():
 	default_file_name = 'test.db'
 	default_table_name = 'test'

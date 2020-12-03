@@ -7,11 +7,18 @@ import argparse
 import thingspeakinfo as c
 
 class ThingSpeakReader():
+	"""
+	Thingspeak Reader Class
+	"""
 	def __init__(self, key=c.READ_KEY_D1, feed=c.FEED_D1):
 		self.__key = key
 		self.__feed = feed
 
 	def read_from_channel(self, num_entries=None):
+		"""
+		Reading from the channel
+		"""
+
 		if num_entries:
 			read_url = c.READ_URL_LIMITED.format(
 				CHANNEL_FEED = self.__feed,
