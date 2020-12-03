@@ -1,7 +1,19 @@
 # SYSC3010_Home_Pixel
-Group Project: Building a Smart Home System
+Group Project: Building a Smart Home System (This project uses python3)
 
-This project uses python3
+## Environment Setup
+Run the environment script to set up the python path
+```
+source homepixel_env.sh
+```
+
+## Testing
+Run test scripts to ensure all hardware and software are fully functional
+```
+source securitysystem_tests.sh
+source lightclapper_tests.sh
+source tempsensor_tests.sh
+```
 
 ## Packages
 Before running the program, make sure these packages are installed on the RaspberryPi:
@@ -14,7 +26,7 @@ sudo apt-get install rclone
 sudo apt install -y gpac
 ```
 
-## Problems with Solutions
+## Possible Problems with Solutions
 ### Problem 1
 
 #### Problem:
