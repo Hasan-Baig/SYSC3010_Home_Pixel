@@ -56,12 +56,6 @@ class MotionSensorClass:
         
         return c.MOTION_NOT_DETECTED, dateNow, timeNow
 
-    #extra
-    def motionDetected(self):
-        if self.__mts.motion_detected():
-            return c.MOTION_DETECTED
-        return c.MOTION_NOT_DETECTED
-
     def close_sensor(self):
         """
         Ignores output to sensor 
