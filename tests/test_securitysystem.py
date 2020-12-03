@@ -126,34 +126,12 @@ class TestSecuritySystem(TestCase):
         """
         test_location = 'test_location'
 
-        self.__mts_mock = MagicMock()
-        self.__cam_mock = MagicMock()
-        self.__securitysystemmock = SecuritySystem(test_location, mts=self.__mts_mock, cam=self.__cam_mock)
-
         self.__cam = Camera()
         self.__test_pin = 23
         self.__mts = MotionSensorClass(self.__test_pin)
         self.__securitysystem = SecuritySystem(test_location, mts=self.__mts, cam=self.__cam)
 
-    def test4_update_status_on(self):
-        """
-        Test if motion sensor detects motion, return = True
-        """
-        self.__mts_mock.check_input.return_value = c.MOTION_DETECTED
-        err_msg = 'Motion detected'
-        self.assertTrue(self.__securitysystem.update_status(), err_msg)
-        # self.assertTrue(c.MOTION_DETECTED, err_msg)
-            
-    def test5_update_status_off(self):
-        """
-        Test if microphone sensor detects sound, return = False
-        """
-        self.__mts_mock.check_input.return_value = c.MOTION_NOT_DETECTED
-        err_msg = 'Motion not detected'
-        self.assertTrue(self.__securitysystem.update_status(), err_msg)
-        # self.assertFalse(c.MOTION_NOT_DETECTED, err_msg)
-
-    def test6_convert_to_mp4(self):
+    def test4_convert_to_mp4(self):
         """
         Test if video is converted to mp4 file
         """
@@ -165,7 +143,7 @@ class TestSecuritySystem(TestCase):
         err_msg = 'Video not converted'
         self.assertTrue(file.exists(), err_msg)
 
-    def test7_send_notification(self):
+    def test5_send_notification(self):
         """
         Test if notification is sent to phone via SMS
         """
@@ -175,7 +153,7 @@ class TestSecuritySystem(TestCase):
         err_msg = 'Video not uploaded'
         self.assertTrue(SMS, err_msg)
 
-    def test8_upload_video(self):
+    def test6_upload_video(self):
         """
         Test if video can be uploaded
         """
@@ -185,7 +163,7 @@ class TestSecuritySystem(TestCase):
         err_msg = 'Video not uploaded'
         self.assertTrue(upl, err_msg)
 
-    def test9_email_link(self):
+    def test7_email_link(self):
         """
         Test if email can be sent
         """

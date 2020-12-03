@@ -98,13 +98,13 @@ class TestLightClapperDB(TestCase):
         self.__db.manual_enter()
 
         expected_records = [{'date': '2020-11-24',
-                             'time': '19:07:13',
                              'location': 'hasan_bedroom',
-                             'nodeID': 'securitysystem_19'},
+                             'nodeID': 'securitysystem_19',
+                             'time': '19:07:13'},
                             {'date': '2020-11-22',
-                             'time': '12:00:15',
                              'location': 'hasan_bedroom',
-                             'nodeID': 'lightclapper_19'}]
+                             'nodeID': 'securitysystem_19',
+                             'time': '12:00:15'}]
 
         retrieved_records = self.__db.get_records()
         err_msg = 'Retrieved and expected records do not match'
