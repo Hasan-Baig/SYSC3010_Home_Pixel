@@ -56,8 +56,11 @@ or
 ```
 flask run --host=0.0.0.0 --port=5000
 ```
+Fill in the above with these parameters:
+```
 --host=0.0.0.0 - expose the app on all network interfaces (default 127.0.0.1)
 --port=5000    - specify the app port (default 5000)  
+```
 
 ## Possible Problems with Solutions
 ### Problem 1
