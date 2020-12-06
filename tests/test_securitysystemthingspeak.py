@@ -2,8 +2,6 @@
 """
 ThingSpeak tests
 """
-from __future__ import absolute_import
-
 import random
 import logging
 import time
