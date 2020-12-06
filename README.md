@@ -1,6 +1,7 @@
 # SYSC3010_Home_Pixel
 Group Project: Building a Smart Home System (This project uses python3)
 
+
 ## Environment Setup
 Run the environment script to set up the python path
 ```
@@ -25,6 +26,39 @@ pip3 install nexmo
 sudo apt-get install rclone
 sudo apt install -y gpac
 ```
+For Flask WebServer:
+```
+sudo apt update
+pip3 install flask
+pip3 install flask-wtf
+sudo apt install python3-opencv
+
+```
+## Flask Webpage (GUI)
+
+### Set up environment variables for Unix/Mac
+```
+export FLASK_APP=main.py
+export FLASK_ENV=development
+export FLASK_DEBUG=1
+```
+### Set up environment variables for Windows
+```
+set FLASK_APP=main.py
+set FLASK_ENV=development
+set FLASK_DEBUG=1
+```
+
+### Start the application
+```
+flask run 
+```
+or 
+```
+flask run --host=0.0.0.0 --port=5000
+```
+--host=0.0.0.0 - expose the app on all network interfaces (default 127.0.0.1)
+--port=5000    - specify the app port (default 5000)  
 
 ## Possible Problems with Solutions
 ### Problem 1
