@@ -31,8 +31,7 @@ For Flask WebServer:
 sudo apt update
 pip3 install flask
 pip3 install flask-wtf
-sudo apt install python3-opencv
-
+sudo apt install python3-opencv 
 ```
 ## Flask Webpage (GUI)
 
