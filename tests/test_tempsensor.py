@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import logging
 import RPi.GPIO as GPIO
 from unittest import TestCase, main

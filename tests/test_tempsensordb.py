@@ -51,8 +51,6 @@ class TestTempDB(TestCase):
 		error_msg = 'Record exists unexpectedly'
 		self.assertFalse(self.__db.record_exists(record), error_msg)
 
-#		self.assertRaises(Exception, self.__db.add_record, record)
-
 	@skipIf(not os.path.exists(PREMADE_DB), 'Run test in top level directory')
 	def test_get_records(self):
 		self.__db = TempDB(db_file = PREMADE_DB, name = PREMADE_TABLE)

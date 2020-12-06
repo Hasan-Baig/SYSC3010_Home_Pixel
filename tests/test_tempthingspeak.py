@@ -4,12 +4,12 @@ import time
 from unittest import TestCase, main
 from thingspeakwriter import ThingSpeakWriter
 from thingspeakreader import ThingSpeakReader
-from thingspeakinfo import (READ_KEY_D2, WRITE_KEY_D2, FEED_D2, GOOD_STATUS)
+import thingspeakinfo as c
 
 class TestThingSpeak(TestCase):
 	def setUp(self):
-		self.__writer = ThingSpeakWriter(WRITE_KEY_D2)
-		self.__reader = ThingSpeakReader(key = READ_KEY_D2, feed = FEED_D2)
+		self.__writer = ThingSpeakWriter(c.WRITE_KEY_D2)
+		self.__reader = ThingSpeakReader(key = c.READ_KEY_D2, feed = c.FEED_D2)
 		time.sleep(1)
 
 	def test_write_to_channel(self):
