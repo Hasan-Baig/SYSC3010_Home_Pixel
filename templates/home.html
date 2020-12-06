@@ -1,0 +1,35 @@
+{% extends "index.html" %}
+{% block content %}
+    
+    <div class="justify-content-center content-section">
+        <img src="static\image\logo.png" alt="logo" width="487" height="300" class="center">
+    </div>
+
+    <h1 class="text-center">Home Pixel</h1>
+    <h4 class="text-center">Discover Your Perfect Smart Home System</h4>
+    <h5 class="text-center">
+        </br> Choose the Node Dashboard you Wish to View
+    </h5>    
+
+    <div class="row justify-content-around">
+        <div class="col-sm-3 content-section">
+            <h3 class="text-center">Security</h3>
+            <a href="{{ url_for('security') }}">
+                <i class="fas fa-camera fa-10x center" style="color: #213452;"></i>
+            </a>
+        </div>
+        <div class="col-sm-3 content-section">
+            <h3 class="text-center">Light</h3>
+            <a href="{{ url_for('light') }}">
+                <i class="fas fa-lightbulb fa-10x center" style="color: #213452;"></i>
+            </a>
+        </div>
+        <div class="col-sm-3 content-section">
+            <h3 class="text-center">Temperature</h3>
+            <a href="{{ url_for('temperature') }}">
+                <i class="fas fa-thermometer-three-quarters fa-10x center" style="color: #213452;"></i>
+            </a>
+        </div>
+    </div>
+
+{% endblock content %}

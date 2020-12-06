@@ -1,0 +1,56 @@
+{% extends "index.html" %}
+{% block content %}
+
+    <h1 class="text-center">Security System Node</h1>
+    <p></p>
+    <p></p>
+    <div class="row justify-content-around">
+        <div class="col-md-7 content-section">
+            <h3 class="text-center">Surveillance Camera</h3>
+            <p class="text-center"><img class="justify-content-center" src="{{ url_for('video_feed') }}"></p>
+        </div>
+        <div class="form-group col-md-4 content-section">
+            <h3 class="text-center">Pan & Tilt Controls</h3>
+            <p></p>
+            <a href="/pan/-"class="button">-</a> [ {{ panServoAngle }} ] <a href="/pan/+"class="button">+</a>
+            <a href="/tilt/-"class="button">-</a> [ {{ tiltServoAngle }} ] <a href="/tilt/+"class="button">+</a>
+
+
+            <!-- <form method="POST" action="pan_tilt">
+                <label for="pancamera">Pan Camera: <span id="pancameralabel">{{ panServoAngle }}</span>°</label>
+                <input type="range" class="custom-range" min="0" max="180" step="1" name="pancamera" id="pancamera">
+                <p></p>
+                <label for="tiltcamera">Tilt Camera: <span id="tiltcameralabel">{{ tiltServoAngle }}</span>°</label>
+                <input type="range" class="custom-range" min="0" max="180" step="1" name="tiltcamera" id="tiltcamera">
+                <p></p>
+                <input class="btn btn-primary justify-content-center" type="submit" value="Change Angles">
+            </form> -->
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-11 content-section">
+            <h3 class="text-center">Analytics</h3>
+            <table id="security-analytics" class="display">
+                <thead>
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Time</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">NodeID</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                        <tr>
+                            <td>{{row["date"]}}</td>
+                            <td>{{row["time"]}}</td>
+                            <td>{{row["location"]}}</td>
+                            <td>{{row['nodeID']}}</td>	
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+{% endblock content %}

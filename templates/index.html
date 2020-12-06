@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Font Awesome CSS -->
+    <script src="https://kit.fontawesome.com/90f483adb6.js" crossorigin="anonymous"></script>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    
+    <!-- DataTable CSS/JS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>
+    
+    <!-- ChartJS -->
+    <script src="https://cdnjs.com/libraries/Chart.js" crossorigin="anonymous"></script>
+
+    <!-- Custom CSS/JS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
+    <!-- <script type="text/javascript" src="js/index.js"></script> -->
+    
+    {% if title %}
+        <title>HomePixel - {{ title }}</title>
+    {% else %}
+        <title>HomePixel</title>
+    {% endif %}
+
+    <script type="text/javascript">
+      $(document).ready( function () {
+        //build the analytic tables
+        $('#security-analytics').DataTable();
+        // $('#light-analytics').DataTable();
+        // $('#temperature-analytics').DataTable();
+
+        // Display the default slider values
+        // $("#pancameralabel").html($("#pancamera").value);
+        // $("#tiltcameralabel").html($("#tiltcamera").value);
+      });
+
+      //FIX
+
+      // Update the current slider values (each time you drag the slider handle)
+      // $("#pancamera").on("input", function () {
+      //   $("#pancameralabel").html($("#pancamera").value);
+      //   $("#tiltcameralabel").html($("#tiltcamera").value);
+      // });
+
+      // $("img").on("click", function () {
+
+      // });
+    </script>
+
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+        <div class="container">
+          <a class="navbar-brand mr-4" href="/"><strong>HOME PIXEL</strong></a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarToggle">
+            <div class="navbar-nav mr-auto">
+              <a class="nav-item nav-link" href="{{ url_for('about') }}"><strong>About</strong></a>
+            </div>
+            <!-- Navbar Right Side -->
+            <div class="navbar-nav">
+              <a class="nav-item nav-link" href="{{ url_for('security') }}"><strong>Security</strong></a>
+              <a class="nav-item nav-link" href="{{ url_for('light') }}"><strong>Light</strong></a>
+              <a class="nav-item nav-link" href="{{ url_for('temperature') }}"><strong>Temperature</strong></a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <main role="main" class="container">
+      {% block content %}{% endblock %}
+    </main>
+
+  </body>
+</html>
