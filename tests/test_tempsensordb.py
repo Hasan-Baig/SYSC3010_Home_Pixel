@@ -4,7 +4,7 @@ from unittest import TestCase, main, skipIf
 from tempDB import TempDB
 
 TEMP_DB = 'temp_tempsensor.db'
-TEMP_TABLE = 'temp_lightclapper'
+TEMP_TABLE = 'temp_tempsensor'
 PREMADE_DB = 'tests/test_db/test_tempsensor.db'
 PREMADE_TABLE = 'test_tempsensor'
 
@@ -29,7 +29,10 @@ class TestTempDB(TestCase):
 	def test_add_good_record(self):
 		record = {'date': '2020-11-22',
 			  'time': '13:51:42',
-		  	  'fanStatus': 1}
+			  'location': 'test_locattion',
+			  'nodeID': 'test_node1',
+		  	  'fanStatus': 1,
+			  'tempVal': 24.3}
 
 		self.__db.create_table()
 		error_msg = 'Record exists unexpectedly'
@@ -56,11 +59,11 @@ class TestTempDB(TestCase):
 		self.__db.manual_enter()
 
 		expected_records = [{'date': '2020-11-22',
-				     'time': '14:23:34',
-				     'fanStatus': 0},
-				    {'date': '2020-11-22',
-				     'time': '14:24:43',
-				     'fanStatus': 1}]
+			    	     'time': '14:23:34',
+			     	     'fanStatus': 0},
+			    	    {'date': '2020-11-22',
+			     	     'time': '14:24:43',
+			     	     'fanStatus': 1}]
 
 		retrieved_records = self.__db.get_records()
 		error_msg = 'Retreived and expected records do not match'

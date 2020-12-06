@@ -17,7 +17,7 @@ class TestThingSpeak(TestCase):
 		expected_reason = "OK"
 		error_msg = "Status of write was unexpected!"
 
-		status, reason = self.__writer.write(test_fields)
+		status, reason = self.__writer.write_to_channel(test_fields)
 		self.assertEqual(status, GOOD_STATUS, error_msg)
 		self.assertEqual(reason, expected_reason, error_msg)
 
@@ -28,7 +28,7 @@ class TestThingSpeak(TestCase):
 		expected_reason = 'Bad Request'
 		error_msg = ''
 
-		status, reason = bad_writer.write(test_fields)
+		status, reason = bad_writer.write_to_channel(test_fields)
 		error_msg = 'Status of write was unexpected!'
 		self.assertEqual(status, expected_status, error_msg)
 		error_msg = 'Reason of request response was unexpected!'
@@ -41,7 +41,7 @@ class TestThingSpeak(TestCase):
 		error_msg = ''
 		test_fields = {'field1': expected_field}
 
-		status, reason = self.__writer.write(test_fields)
+		status, reason = self.__writer.write_to_channel(test_fields)
 		error_msg = 'Status of write was unexpected'
 		self.assertEqual(status, GOOD_STATUS, error_msg)
 

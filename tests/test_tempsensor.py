@@ -6,27 +6,29 @@ from unittest.mock import patch, call, MagicMock
 from tempsensor.tempsensor import TempSensor
 from tempsensor.fan import Fan
 from tempsensor.temp import Temperature
+import thingspeakinfo as c
 
 class TestTempSensor(TestCase):
 	def setUp(self):
-		self.fan_mock = MagicMock()
-		self.temp_mock = MagicMock()
-		self.fan_mock.__fan_on = False
-		self.temp_sensor = TempSensor(temp = self.temp_mock, fan = self.fan_mock)
+		self.__temp_mock = MagicMock()
+		fan_mock = MagicMock()
+		fan_mock.__fan_on = False
+		test_location = 'test_location'
+		self.__temp_sensor = TempSensor(test_location, temp = self.__temp_mock, fan = fan_mock)
 
 	def test_checking_status_true(self):
 		"""
 		Testing to see if the TempSensor node is functioning properly
 		"""
-		self.temp_mock.read_data.return_value = True
-		self.assertTrue(self.temp_sensor.checking_status())
+		self.__temp_mock.read_data.return_value = True
+		self.assertTrue(self.__temp_sensor.checking_status())
 
 	def test_checking_status_false(self):
 		"""
 		Testing to see if the TempSensor node does not function properly
 		"""
-		self.temp_mock.read_data.return_value = False
-		self.assertFalse(self.temp_sensor.checking_status())
+		self.__temp_mock.read_data.return_value = False
+		self.assertFalse(self.__temp_sensor.checking_status())
 
 @patch("RPi.GPIO.output", autospec = True)
 class TestFan(TestCase):
@@ -86,8 +88,8 @@ class TestTemperature(TestCase):
 		err_msg = "Temp Sensor detected temperature"
 		self.assertTrue(self.temp.read_data(), err_msg)
 
-if __name__ == "__main__":
-	logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level = logging.INFO)
+if __name__ == '__main__':
+	logging.basicConfig(format=c.LOGGING_FORMAT, level = c.LOGGING_TEST_LEVEL)
 	main()
 
 
