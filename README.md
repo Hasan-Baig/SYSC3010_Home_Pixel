@@ -8,6 +8,31 @@ Run the environment script to set up the python path
 source homepixel_env.sh
 ```
 
+## Deployment
+### TempSensor
+* Run TempSensor program on the TempSensor node:
+```
+cd tempsensor/
+python3 tempsensor.py --location <name_room> -w
+```
+* Run TempSensor client program on the SecuritySystem node:
+```
+cd tempsensor/
+python3 tempsensorclient.py
+```
+
+### LightClapper
+* Run LightClapper program on the LightClapper node:
+```
+cd lightclapper/
+python3 lightclapper.py --location <name_room> -w
+```
+* Run LightClapper client program on the Security System node:
+```
+cd lightclapper/
+python3 lightclapperclient.py
+```
+
 ## Testing
 Run test scripts to ensure all hardware and software are fully functional
 ```
