@@ -13,7 +13,7 @@ source homepixel_env.sh
 * Run TempSensor program on the TempSensor node:
 ```
 cd tempsensor/
-python3 tempsensor.py --location <name_room>
+python3 tempsensor.py --location <name_room> -w
 ```
 * Run TempSensor client program on the SecuritySystem node:
 ```
@@ -25,7 +25,7 @@ python3 tempsensorclient.py
 * Run LightClapper program on the LightClapper node:
 ```
 cd lightclapper/
-python3 lightclapper.py --location <name_room>
+python3 lightclapper.py --location <name_room> -w
 ```
 * Run LightClapper client program on the Security System node:
 ```
