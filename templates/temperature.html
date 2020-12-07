@@ -29,6 +29,16 @@
                                 {% for item in tempValues %}
                                     "{{ item }}",
                                 {% endfor %}
+                            ],
+                            hoverBorderColor: [
+                                {% for item in status %}
+                                "{{ item }}",
+                                {% endfor %}
+                            ],
+                            hoverBorderWidth: [
+                                {% for item in status %}
+                                5,
+                                {% endfor %}
                             ]
                         }]
                     },
@@ -61,7 +71,11 @@
                             <td>{{row["time"]}}</td>
                             <td>{{row["location"]}}</td>
                             <td>{{row['nodeID']}}</td>	
-                            <td>{{row['fanStatus']}}</td>
+                            {% if row['fanStatus'] == 1 %}
+                                <td>ON</td>
+                            {% else %}
+                                <td>OFF</td>
+                            {% endif %}
 			                <td>{{row['tempVal']}}</td>	
                         </tr>
                     {% endfor %}

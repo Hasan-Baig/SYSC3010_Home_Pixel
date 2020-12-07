@@ -144,3 +144,10 @@ For this case, the command was "kill -KILL 2203". After doing this, use "ps -a" 
 sudo raspi-config
 ```
 select: Advanced options -> Memory split -> and set 128MB or 256MB -> Finish -> Reboot
+
+## **FINAL NOTE: CONSTRAINTS OF THE SYSTEM (LIMITATION OF RESOURCES)**
+On the webserver, the localhost will crash if you access the Security page at the same time as running the SecuritySystem node. This is because the Security page livestreams a video of the camera and the SecuritySystem node has to record a video. The Raspberry Pi does not have enough recources to access the camera module port to record and livestream at the same time, therefore the following message will pop up on the console, and exit the script.
+
+<img src="static\image\cameraResourcesCrash.PNG" alt="Console Crash from Accessing Camera Port" style="float: left;" />
+
+This is a constraint of the system and cannot be fixed while using a Raspbery Pi.

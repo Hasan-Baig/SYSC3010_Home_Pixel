@@ -22,9 +22,10 @@ TEST_FIELD = 'field1'
 # URL Syntax for LightClapper
 READ_URL = 'https://api.thingspeak.com/channels/' + \
            '{CHANNEL_FEED}/feeds.json?api_key=' + \
-           '{READ_KEY}'
+           '{READ_KEY}&timezone=America%2FNew_York'
 READ_URL_LIMITED = 'https://api.thingspeak.com/channels/' + \
-                   '{CHANNEL_FEED}/fields/1.json?results={RESULTS}'
+                   '{CHANNEL_FEED}/fields/1.json?results={RESULTS}' +\
+                   '&timezone=America%2FNew_York'
 
 # LightClapper constants
 SOUND_DETECTED = True
