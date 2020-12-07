@@ -51,6 +51,8 @@ class TestTempDB(TestCase):
 		error_msg = 'Record exists unexpectedly'
 		self.assertFalse(self.__db.record_exists(record), error_msg)
 
+		self.assertRaises(Exception, self.__db.add_record, record)
+
 	@skipIf(not os.path.exists(PREMADE_DB), 'Run test in top level directory')
 	def test_get_records(self):
 		self.__db = TempDB(db_file = PREMADE_DB, name = PREMADE_TABLE)
@@ -58,10 +60,16 @@ class TestTempDB(TestCase):
 
 		expected_records = [{'date': '2020-11-22',
 			    	     'time': '14:23:34',
-			     	     'fanStatus': 0},
+				     'location': 'my_room',
+				     'nodeID': 'temp_node12',
+			     	     'fanStatus': 0,
+				     'tempVal': 23.5},
 			    	    {'date': '2020-11-22',
-			     	     'time': '14:24:43',
-			     	     'fanStatus': 1}]
+			     	     'time': '14:23:35',
+				     'location': 'my_room',
+				     'nodeID': 'temp_node12',
+			     	     'fanStatus': 1,
+				     'tempVal': 27.6}]
 
 		retrieved_records = self.__db.get_records()
 		error_msg = 'Retreived and expected records do not match'
