@@ -84,6 +84,7 @@ set FLASK_APP=main.py
 set FLASK_ENV=development
 set FLASK_DEBUG=1
 ```
+**Note: if you already ran "source homepixel_env.sh" then the environment variables are already setup**
 
 ### Start the application
 ```
