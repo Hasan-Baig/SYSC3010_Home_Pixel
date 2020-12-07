@@ -67,17 +67,18 @@ def security():
 
     return render_template("security.html", title='SecuritySystem', rows=rows, **templateData)
 
-def gen(camera): 
-   """Video streaming generator function.""" 
-   while True: 
-        frame = camera.get_frame()
-        yield (b'--frame\r\n' 
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n') 
 
-@app.route("/video_feed") 
-def video_feed(): 
-   """Video streaming route. Put this in the src attribute of an img tag.""" 
-   return Response(gen(Camera()), 
+def gen(camera):
+   """Video streaming generator function."""
+   while True:
+        frame = camera.get_frame()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+@app.route("/video_feed")
+def video_feed():
+   """Video streaming route. Put this in the src attribute of an img tag."""
+   return Response(gen(Camera()),
                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route("/<servo>/<angle>")
@@ -96,7 +97,7 @@ def move(servo, angle):
 		else:
 			tiltServoAngle = tiltServoAngle - 10
 		servo_control.change_tilt_angle(tiltServoAngle)
-	
+
 	templateData = {
       'panServoAngle'	: panServoAngle,
       'tiltServoAngle'	: tiltServoAngle
