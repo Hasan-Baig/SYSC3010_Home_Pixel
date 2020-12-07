@@ -5,6 +5,7 @@ import os
 from random import randint
 from camera_pi import Camera
 from securitysystem.pantilt import PanTilt
+import math
 
 app = Flask(__name__)
 
@@ -19,11 +20,11 @@ tiltServoAngle = 90
 #start up pantilt servos
 servo_control = PanTilt()
 servo_control.start_servo()
+servo_control.change_pan_angle(panServoAngle)
+servo_control.change_tilt_angle(tiltServoAngle)
 
-# RUN ALL THREE NODE_CLIENTS to create three local dbs 
-# and all info should be updated on all pages
-# **** TODO ****
-# i need to exit these after shutdown since they are infinite loops
+# RUN ALL THREE NODE_CLIENTS to create three local databases 
+# ALL info should be updated on the tables of all pages
 
 #methods to access all databases
 def get_ss_db_connection():
@@ -79,32 +80,6 @@ def video_feed():
    return Response(gen(Camera()), 
                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
-# @app.route("/<servo>/<angle>")
-# def move(servo, angle):
-# 	global panServoAngle
-# 	global tiltServoAngle
-
-# 	if (servo == 'pan'):
-#         if (angle == '+'):
-#             panServoAngle = panServoAngle + 10
-#         else: 
-#             panServoAngle = panServoAngle - 10
-#         servo_control.change_pan_angle(panServoAngle) 
-	
-#     if (servo == 'tilt'):
-# 		if (angle == '+'):
-# 			tiltServoAngle = tiltServoAngle + 10
-# 		else:
-# 			tiltServoAngle = tiltServoAngle - 10
-#         servo_control.change_tilt_angle(tiltServoAngle) 
-
-# 	templateData = {
-#         'panServoAngle'	: panServoAngle,
-#         'tiltServoAngle'	: tiltServoAngle
-# 	}
-	
-#     return render_template('security.html', **templateData)
-
 @app.route("/<servo>/<angle>")
 def move(servo, angle):
 	global panServoAngle
@@ -126,46 +101,75 @@ def move(servo, angle):
       'panServoAngle'	: panServoAngle,
       'tiltServoAngle'	: tiltServoAngle
 	}
-	return render_template('index.html', **templateData)
+
+	return render_template('security.html', **templateData)
 
 # *************************************************************************************************
 
 @app.route("/light")
 def light():
+    # Intialize data for graph
+    data = {}
+    light_status = []
+    labels = []
+    colors = []
+
     conn = get_lp_db_connection()
     rows = conn.execute('SELECT * FROM lightclapper').fetchall()
     conn.close()
-    return render_template("light.html", title='LightClapper', rows=rows)
+
+    # Iterate to check for new locations
+    for row in rows:
+        location = row['location']
+        status = row['lightStatus']
+        if location not in data.keys():
+            data[location] = 0
+        data[location] = data[location] + status
+
+    # Iterate for colors and lists
+    for k, v in data.items():
+        R = randint(0, 255)
+        G = randint(0, 255)
+        B = randint(0, 255)
+        labels.append(k)
+        light_status.append(v)
+        colors.append("rgb({r},{g},{b})".format(r=R,g=G,b=B))
+
+    return render_template("light.html", title='LightClapper', rows=rows,
+        lightData=light_status, colorData=colors, lightLabels=labels)
 
 # *************************************************************************************************
 
 @app.route("/temperature")
 def temperature():
     data = {}
-    temperature = []
     labels = []
+    tempValues = []
     colors = []
 
     conn = get_ts_db_connection()
     rows = conn.execute('SELECT * FROM tempsensor').fetchall()
     conn.close()
 
+    # Iterate to check for new locations
     for row in rows:
         location = row['location']
-        tempVal = row['tempVal']
+        temperature = round(row['tempVal'],2)
         if location not in data.keys():
             data[location] = 0
-        data[location] = data[location]+tempVal
+        data[location] = temperature
 
+    # Iterate for colors and lists
     for k, v in data.items():
         R = randint(0, 255)
         G = randint(0, 255)
         B = randint(0, 255)
         labels.append(k)
-        temperature.append(v)
+        tempValues.append(v)
         colors.append("rgb({r},{g},{b})".format(r=R,g=G,b=B))
 
-    return render_template("temperature.html", title='TempSensor', rows=rows, tempData=temperature, colorData=colors, tempLabels=labels)
+    return render_template("temperature.html", title='TempSensor', rows=rows, 
+        tempValues=tempValues, colorData=colors, tempLabels=labels)
 
 # *************************************************************************************************
 

@@ -6,40 +6,43 @@
     <p></p>
     <div class="row justify-content-center">
         <div class="col-md-11 content-section">
-            <h3 class="text-center">Temperature Value vs Time</h3>
-            <canvas id="myChart" width="108" height="54"></canvas>
-	    <script>
-	    var ctx = document.getElementById('myChart').getContext('2d')
-	    var myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [
-                        {% for item in tempLabels %}
-                        "{{ item }}"
-                        {% endfor %}
-                    ],
-                    datasets: [{
-                        label: "My First Dataset",
-                        backgroundColor: [
-                            {% for item in colorData %}
-                            "{{ item }}"
+            <h3 class="text-center">Node Location vs Latest Temperature Value</h3>
+            <canvas id="tempChart" width="108" height="54"></canvas>
+            <script type="text/javascript">
+                var ctx = document.getElementById('tempChart').getContext('2d')
+                var tempChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [
+                            {% for item in tempLabels %}
+                                "{{ item }}",
                             {% endfor %}
                         ],
-                        data: [
-                            {% for item in tempData %}
-                            "{{ item }}"
-                            {% endfor %}
-			],
-                    }]
-                },
-                options: {}
-            });
-	    </script>
+                        datasets: [{
+                            label: "Dataset 1",
+                            backgroundColor: [
+                                {% for item in colorData %}
+                                    "{{ item }}",
+                                {% endfor %}
+                            ],
+                            data: [
+                                {% for item in tempValues %}
+                                    "{{ item }}",
+                                {% endfor %}
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true
+                    }
+                });
+            </script>
         </div>
     </div>
     <div class="row justify-content-center">
         <div class="col-md-11 content-section">
-            <h3 class="text-center">Temperature Analytics</h3>
+            <h3 class="text-center">Analytics</h3>
+            <button class="btn btn-primary" type="submit" onClick="refreshPage()" style="float: right;">Refresh Results</button>
             <table id="temperature-analytics" class="display">
                 <thead>
                   <tr>
@@ -47,7 +50,7 @@
                     <th scope="col">Time</th>
                     <th scope="col">Location</th>
                     <th scope="col">NodeID</th>
-		    <th scope="col">FanStatus</th>
+		            <th scope="col">FanStatus</th>
                     <th scope="col">TemperatureValue</th>
                   </tr>
                 </thead>
@@ -59,7 +62,7 @@
                             <td>{{row["location"]}}</td>
                             <td>{{row['nodeID']}}</td>	
                             <td>{{row['fanStatus']}}</td>
-			    <td>{{row['tempVal']}}</td>	
+			                <td>{{row['tempVal']}}</td>	
                         </tr>
                     {% endfor %}
                 </tbody>
