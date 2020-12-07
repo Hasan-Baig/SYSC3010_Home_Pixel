@@ -9,6 +9,18 @@ source homepixel_env.sh
 ```
 
 ## Deployment
+### SecuritySystem
+* Run SecuritySystem program on the SecuritySystem node:
+```
+cd securitysystem/
+python3 securitysystem.py -v --location <name_room>
+```
+* Run SecuritySystem client program on the SecuritySystem node:
+```
+cd securitysystem/
+python3 securitysystemclient.py -v
+```
+
 ### TempSensor
 * Run TempSensor program on the TempSensor node:
 ```
