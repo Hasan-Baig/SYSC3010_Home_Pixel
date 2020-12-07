@@ -167,7 +167,7 @@ class LightClapperClient:
             return False, data
 
         data = {'date': date_list[DATE_INDEX],
-                'time': date_list[TIME_INDEX],
+                'time': date_list[TIME_INDEX].split('-')[0],
                 'location': location,
                 'nodeID': node_id,
                 'lightStatus': light_status}
