@@ -1,13 +1,42 @@
 {% extends "index.html" %}
 {% block content %}
 
-    <h1 class="text-center">Light Clapper Node</h1>
+    <h1 class="text-center">Temperature Sensor Node</h1>
     <p></p>
     <p></p>
     <div class="row justify-content-center">
         <div class="col-md-11 content-section">
-            <h3 class="text-center">Graph</h3>
-            <canvas id="tempChart" width="400" height="400"></canvas>
+            <h3 class="text-center">Node Location vs Latest Temperature Value</h3>
+            <canvas id="tempChart" width="108" height="54"></canvas>
+            <script type="text/javascript">
+                var ctx = document.getElementById('tempChart').getContext('2d')
+                var tempChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [
+                            {% for item in tempLabels %}
+                                "{{ item }}",
+                            {% endfor %}
+                        ],
+                        datasets: [{
+                            label: "Dataset 1",
+                            backgroundColor: [
+                                {% for item in colorData %}
+                                    "{{ item }}",
+                                {% endfor %}
+                            ],
+                            data: [
+                                {% for item in tempValues %}
+                                    "{{ item }}",
+                                {% endfor %}
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true
+                    }
+                });
+            </script>
         </div>
     </div>
     <div class="row justify-content-center">
@@ -21,6 +50,7 @@
                     <th scope="col">Time</th>
                     <th scope="col">Location</th>
                     <th scope="col">NodeID</th>
+		            <th scope="col">FanStatus</th>
                     <th scope="col">TemperatureValue</th>
                   </tr>
                 </thead>
@@ -31,7 +61,8 @@
                             <td>{{row["time"]}}</td>
                             <td>{{row["location"]}}</td>
                             <td>{{row['nodeID']}}</td>	
-                            <td>{{row['lightStatus']}}</td>	
+                            <td>{{row['fanStatus']}}</td>
+			                <td>{{row['tempVal']}}</td>	
                         </tr>
                     {% endfor %}
                 </tbody>

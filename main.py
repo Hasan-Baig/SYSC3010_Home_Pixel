@@ -5,6 +5,7 @@ import os
 from random import randint
 from camera_pi import Camera
 from securitysystem.pantilt import PanTilt
+import math
 
 app = Flask(__name__)
 
@@ -141,10 +142,34 @@ def light():
 
 @app.route("/temperature")
 def temperature():
+    data = {}
+    labels = []
+    tempValues = []
+    colors = []
+
     conn = get_ts_db_connection()
     rows = conn.execute('SELECT * FROM tempsensor').fetchall()
     conn.close()
-    return render_template("temperature.html", title='TempSensor', rows=rows)
+
+    # Iterate to check for new locations
+    for row in rows:
+        location = row['location']
+        temperature = round(row['tempVal'],2)
+        if location not in data.keys():
+            data[location] = 0
+        data[location] = temperature
+
+    # Iterate for colors and lists
+    for k, v in data.items():
+        R = randint(0, 255)
+        G = randint(0, 255)
+        B = randint(0, 255)
+        labels.append(k)
+        tempValues.append(v)
+        colors.append("rgb({r},{g},{b})".format(r=R,g=G,b=B))
+
+    return render_template("temperature.html", title='TempSensor', rows=rows, 
+        tempValues=tempValues, colorData=colors, tempLabels=labels)
 
 # *************************************************************************************************
 
