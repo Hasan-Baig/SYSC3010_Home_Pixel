@@ -110,7 +110,7 @@ class TempSensorClient:
 			return False, data
 
 		data = {'date': date_list[DATE_INDEX],
-			'time': date_list[TIME_INDEX],
+			'time': date_list[TIME_INDEX].split('-')[0],
 			'location': location,
 			'nodeID': node_id,
 			'fanStatus': fan_status,
