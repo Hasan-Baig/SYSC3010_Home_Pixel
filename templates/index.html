@@ -37,25 +37,24 @@
       $(document).ready( function () {
         //build the analytic tables
         $('#security-analytics').DataTable();
-        // $('#light-analytics').DataTable();
-        // $('#temperature-analytics').DataTable();
-
-        // Display the default slider values
-        // $("#pancameralabel").html($("#pancamera").value);
-        // $("#tiltcameralabel").html($("#tiltcamera").value);
+        $('#light-analytics').DataTable();
+        $('#temperature-analytics').DataTable();
       });
-
-      //FIX
-
-      // Update the current slider values (each time you drag the slider handle)
-      // $("#pancamera").on("input", function () {
-      //   $("#pancameralabel").html($("#pancamera").value);
-      //   $("#tiltcameralabel").html($("#tiltcamera").value);
-      // });
-
-      // $("img").on("click", function () {
-
-      // });
+      
+      //refresh button
+      function refreshPage(){
+        if (window.location.href == "http://127.0.0.1:5000/pan/-"){
+          window.location.replace("http://127.0.0.1:5000/security");
+        } else if (window.location.href == "http://127.0.0.1:5000/pan/+") {
+          window.location.replace("http://127.0.0.1:5000/security");
+        } else if (window.location.href == "http://127.0.0.1:5000/tilt/-") {
+          window.location.replace("http://127.0.0.1:5000/security");
+        } else if (window.location.href == "http://127.0.0.1:5000/tilt/+") {
+          window.location.replace("http://127.0.0.1:5000/security");
+        } else {
+          window.location.reload();
+        }
+      }
     </script>
 
   </head>
