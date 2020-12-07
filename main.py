@@ -134,6 +134,13 @@ def light():
     conn = get_lp_db_connection()
     rows = conn.execute('SELECT * FROM lightclapper').fetchall()
     conn.close()
+    """
+    #TODO: dynamically get data from DB to pass to template
+    data = [10]
+    background_color = ["rgb(54, 162, 235)"]
+    labels = ["test"]
+    return render_template("light.html", title='LightClapper', rows=rows, lightData=data, colorData=background_color, lightLabels=labels)
+    """
     return render_template("light.html", title='LightClapper', rows=rows)
 
 # *************************************************************************************************
