@@ -1,25 +1,53 @@
 {% extends "index.html" %}
 {% block content %}
 
-    <h1 class="text-center">Light Clapper Node</h1>
+    <h1 class="text-center">Temperature Sensor Node</h1>
     <p></p>
     <p></p>
     <div class="row justify-content-center">
         <div class="col-md-11 content-section">
-            <h3 class="text-center">Graph</h3>
-            <canvas></canvas>
+            <h3 class="text-center">Temperature Value vs Time</h3>
+            <canvas id="myChart" width="108" height="54"></canvas>
+	    <script>
+	    var ctx = document.getElementById('myChart').getContext('2d')
+	    var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [
+                        {% for item in tempLabels %}
+                        "{{ item }}"
+                        {% endfor %}
+                    ],
+                    datasets: [{
+                        label: "My First Dataset",
+                        backgroundColor: [
+                            {% for item in colorData %}
+                            "{{ item }}"
+                            {% endfor %}
+                        ],
+                        data: [
+                            {% for item in tempData %}
+                            "{{ item }}"
+                            {% endfor %}
+			],
+                    }]
+                },
+                options: {}
+            });
+	    </script>
         </div>
     </div>
     <div class="row justify-content-center">
         <div class="col-md-11 content-section">
-            <h3 class="text-center">Analytics</h3>
-            <table id="security-analytics" class="display">
+            <h3 class="text-center">Temperature Analytics</h3>
+            <table id="temperature-analytics" class="display">
                 <thead>
                   <tr>
                     <th scope="col">Date</th>
                     <th scope="col">Time</th>
                     <th scope="col">Location</th>
                     <th scope="col">NodeID</th>
+		    <th scope="col">FanStatus</th>
                     <th scope="col">TemperatureValue</th>
                   </tr>
                 </thead>
@@ -30,7 +58,8 @@
                             <td>{{row["time"]}}</td>
                             <td>{{row["location"]}}</td>
                             <td>{{row['nodeID']}}</td>	
-                            <td>{{row['lightStatus']}}</td>	
+                            <td>{{row['fanStatus']}}</td>
+			    <td>{{row['tempVal']}}</td>	
                         </tr>
                     {% endfor %}
                 </tbody>
