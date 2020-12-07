@@ -23,7 +23,7 @@ servo_control.start_servo()
 servo_control.change_pan_angle(panServoAngle)
 servo_control.change_tilt_angle(tiltServoAngle)
 
-# RUN ALL THREE NODE_CLIENTS to create three local databases
+# RUN ALL THREE NODE_CLIENTS to create three local databases 
 # ALL info should be updated on the tables of all pages
 
 #methods to access all databases
@@ -66,6 +66,7 @@ def security():
     conn.close()
 
     return render_template("security.html", title='SecuritySystem', rows=rows, **templateData)
+
 
 def gen(camera):
    """Video streaming generator function."""
@@ -168,7 +169,7 @@ def temperature():
         tempValues.append(v)
         colors.append("rgb({r},{g},{b})".format(r=R,g=G,b=B))
 
-    return render_template("temperature.html", title='TempSensor', rows=rows,
+    return render_template("temperature.html", title='TempSensor', rows=rows, 
         tempValues=tempValues, colorData=colors, tempLabels=labels)
 
 # *************************************************************************************************
