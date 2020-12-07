@@ -6,8 +6,48 @@
     <p></p>
     <div class="row justify-content-center">
         <div class="col-md-11 content-section">
-            <h3 class="text-center">Graph</h3>
-            <canvas></canvas>
+            <h3 class="text-center">Node Location vs Amount of Activity</h3>
+            <canvas id="myChart" width="108" height="54"></canvas>
+            <script>
+            var ctx = document.getElementById('myChart').getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [
+                            {% for item in lightData %}
+                             "{{ item }}",
+                             {% endfor %}
+                        ],
+                        backgroundColor: [
+                            {% for item in colorData %}
+                            "{{ item }}",
+                            {% endfor %}
+                        ],
+                        label: 'Dataset 1',
+                    }],
+                    labels: [
+                        {% for item in lightLabels %}
+                         "{{ item }}",
+                        {% endfor %}
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Location of LightClapper Activity'
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
+                    }
+                }
+            });
+            </script>
         </div>
     </div>
     <div class="row justify-content-center">
@@ -30,8 +70,12 @@
                             <td>{{row["date"]}}</td>
                             <td>{{row["time"]}}</td>
                             <td>{{row["location"]}}</td>
-                            <td>{{row['nodeID']}}</td>	
-                            <td>{{row['lightStatus']}}</td>	
+                            <td>{{row['nodeID']}}</td>
+                            {% if row['lightStatus'] == 1 %}
+                                <td>ON</td>
+                            {% else %}
+                                <td>OFF</td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>
