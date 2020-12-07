@@ -150,4 +150,4 @@ On the webserver, the localhost will crash if you access the Security page at th
 
 <img src="static\image\cameraResourcesCrash.PNG" alt="Console Crash from Accessing Camera Port" style="float: left;" />
 
-This is a constraint of the system and cannot be fixed while using a Raspbery Pi.
+This is a constraint of the system and cannot be fixed while using a Raspberry Pi.
