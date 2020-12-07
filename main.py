@@ -5,6 +5,7 @@ import os
 from random import randint
 from camera_pi import Camera
 from securitysystem.pantilt import PanTilt
+from lightclapper.constants import ON_INT
 import math
 
 app = Flask(__name__)
@@ -111,7 +112,8 @@ def move(servo, angle):
 def light():
     # Intialize data for graph
     data = {}
-    light_status = []
+    activity = []
+    current_status = []
     labels = []
     colors = []
 
@@ -124,20 +126,32 @@ def light():
         location = row['location']
         status = row['lightStatus']
         if location not in data.keys():
-            data[location] = 0
-        data[location] = data[location] + status
+            # tuple: (sum of LED on, latest LED status)
+            data[location] = (0, status)
+        data[location] = (data[location][0] + status, status)
 
     # Iterate for colors and lists
-    for k, v in data.items():
+    # Note: random colors for dynamic color assignment (scalability)
+    for location, v in data.items():
         R = randint(0, 255)
         G = randint(0, 255)
         B = randint(0, 255)
-        labels.append(k)
-        light_status.append(v)
         colors.append("rgb({r},{g},{b})".format(r=R,g=G,b=B))
 
+        sum_of_activity = v[0]
+        latest_status = v[1]
+
+        # Hover color for ON (yellow) / OFF (grey)
+        if latest_status == ON_INT:
+            current_status.append("rgb(255,255,0)")
+        else:
+            current_status.append("rgb(128,128,128)")
+
+        labels.append(location)
+        activity.append(sum_of_activity)
+
     return render_template("light.html", title='LightClapper', rows=rows,
-        lightData=light_status, colorData=colors, lightLabels=labels)
+        lightData=activity, colorData=colors, lightLabels=labels, status=current_status)
 
 # *************************************************************************************************
 
