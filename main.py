@@ -2,6 +2,7 @@
 from flask import Flask, render_template, url_for, redirect, Response, request
 import sqlite3
 import os
+from random import randint
 from camera_pi import Camera
 from securitysystem.pantilt import PanTilt
 
@@ -106,10 +107,35 @@ def move(servo, angle):
 
 @app.route("/light")
 def light():
+    # Intialize data for graph
+    data = {}
+    light_status = []
+    labels = []
+    colors = []
+
     conn = get_lp_db_connection()
     rows = conn.execute('SELECT * FROM lightclapper').fetchall()
     conn.close()
-    return render_template("light.html", title='LightClapper', rows=rows)
+
+    # Iterate to check for new locations
+    for row in rows:
+        location = row['location']
+        status = row['lightStatus']
+        if location not in data.keys():
+            data[location] = 0
+        data[location] = data[location] + status
+
+    # Iterate for colors and lists
+    for k, v in data.items():
+        R = randint(0, 255)
+        G = randint(0, 255)
+        B = randint(0, 255)
+        labels.append(k)
+        light_status.append(v)
+        colors.append("rgb({r},{g},{b})".format(r=R,g=G,b=B))
+
+    return render_template("light.html", title='LightClapper', rows=rows,
+        lightData=light_status, colorData=colors, lightLabels=labels)
 
 # *************************************************************************************************
 
