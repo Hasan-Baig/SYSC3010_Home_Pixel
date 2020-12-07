@@ -159,6 +159,7 @@ def light():
 def temperature():
     data = {}
     labels = []
+    current_status = []
     tempValues = []
     colors = []
 
@@ -169,22 +170,33 @@ def temperature():
     # Iterate to check for new locations
     for row in rows:
         location = row['location']
+        status = row['fanStatus']
         temperature = round(row['tempVal'],2)
         if location not in data.keys():
-            data[location] = 0
-        data[location] = temperature
+            # tuple: (temperature, latest fan status)
+            data[location] = (0, status)
+        data[location] = (temperature, status)
 
     # Iterate for colors and lists
     for k, v in data.items():
         R = randint(0, 255)
         G = randint(0, 255)
         B = randint(0, 255)
-        labels.append(k)
-        tempValues.append(v)
         colors.append("rgb({r},{g},{b})".format(r=R,g=G,b=B))
 
+        labels.append(k)
+        tempValues.append(v[0])
+        latest_status = v[1]
+        colors.append("rgb({r},{g},{b})".format(r=R,g=G,b=B))
+
+        # Hover color for ON (yellow) / OFF (grey)
+        if latest_status == ON_INT:
+            current_status.append("rgb(255,255,0)")
+        else:
+            current_status.append("rgb(128,128,128)")
+
     return render_template("temperature.html", title='TempSensor', rows=rows, 
-        tempValues=tempValues, colorData=colors, tempLabels=labels)
+        tempValues=tempValues, colorData=colors, tempLabels=labels, status=current_status)
 
 # *************************************************************************************************
 
