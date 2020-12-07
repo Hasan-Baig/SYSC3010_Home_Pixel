@@ -187,7 +187,6 @@ def temperature():
         labels.append(k)
         tempValues.append(v[0])
         latest_status = v[1]
-        colors.append("rgb({r},{g},{b})".format(r=R,g=G,b=B))
 
         # Hover color for ON (yellow) / OFF (grey)
         if latest_status == ON_INT:
