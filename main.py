@@ -2,6 +2,7 @@
 from flask import Flask, render_template, url_for, redirect, Response, request
 import sqlite3
 import os
+from random import randint
 from camera_pi import Camera
 from securitysystem.pantilt import PanTilt
 
@@ -140,10 +141,31 @@ def light():
 
 @app.route("/temperature")
 def temperature():
+    data = {}
+    temperature = []
+    labels = []
+    colors = []
+
     conn = get_ts_db_connection()
     rows = conn.execute('SELECT * FROM tempsensor').fetchall()
     conn.close()
-    return render_template("temperature.html", title='TempSensor', rows=rows)
+
+    for row in rows:
+        location = row['location']
+        tempVal = row['tempVal']
+        if location not in data.keys():
+            data[location] = 0
+        data[location] = data[location]+tempVal
+
+    for k, v in data.items():
+        R = randint(0, 255)
+        G = randint(0, 255)
+        B = randint(0, 255)
+        labels.append(k)
+        temperature.append(v)
+        colors.append("rgb({r},{g},{b})".format(r=R,g=G,b=B))
+
+    return render_template("temperature.html", title='TempSensor', rows=rows, tempData=temperature, colorData=colors, tempLabels=labels)
 
 # *************************************************************************************************
 
