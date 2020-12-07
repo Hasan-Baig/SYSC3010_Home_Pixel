@@ -58,6 +58,19 @@ pip3 install flask
 pip3 install flask-wtf
 sudo apt install python3-opencv
 ```
+
+## BME280 Temperature Sensor Setup
+Setting up the BME280 Temperature Sensor on the RPi
+```
+sudo raspi-config --> Interfacing Options --> Enable I2C (Yes)
+sudo apt-get install i2c-tools python -pip
+```
+The command below checks whether the device is communicating with the RaspberryPi properly:
+```
+i2cdetect -y 1
+```
+The number printed out (Either 76 or 77) is the address of your device. You will need to set the address equal to the outputted number in the code.
+
 ## Flask Webpage (GUI)
 
 ### Set up environment variables for Unix/Mac
