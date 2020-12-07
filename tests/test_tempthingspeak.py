@@ -18,7 +18,7 @@ class TestThingSpeak(TestCase):
 		error_msg = "Status of write was unexpected!"
 
 		status, reason = self.__writer.write_to_channel(test_fields)
-		self.assertEqual(status, GOOD_STATUS, error_msg)
+		self.assertEqual(status, c.GOOD_STATUS, error_msg)
 		self.assertEqual(reason, expected_reason, error_msg)
 
 	def test_write_to_invalid_channel(self):
@@ -43,7 +43,7 @@ class TestThingSpeak(TestCase):
 
 		status, reason = self.__writer.write_to_channel(test_fields)
 		error_msg = 'Status of write was unexpected'
-		self.assertEqual(status, GOOD_STATUS, error_msg)
+		self.assertEqual(status, c.GOOD_STATUS, error_msg)
 
 		actual_fields = self.__reader.read_from_channel()
 		actual = actual_fields['feeds'][-1]['field1']
