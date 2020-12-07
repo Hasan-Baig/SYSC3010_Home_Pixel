@@ -10,36 +10,36 @@ source homepixel_env.sh
 
 ## Deployment
 ### SecuritySystem
-* Run SecuritySystem program on the SecuritySystem node:
+Run SecuritySystem program on the SecuritySystem node:
 ```
 cd securitysystem/
 python3 securitysystem.py -v --location <name_room>
 ```
-* Run SecuritySystem client program on the SecuritySystem node:
+Run SecuritySystem client program on the SecuritySystem node:
 ```
 cd securitysystem/
 python3 securitysystemclient.py -v
 ```
 
 ### TempSensor
-* Run TempSensor program on the TempSensor node:
+Run TempSensor program on the TempSensor node:
 ```
 cd tempsensor/
 python3 tempsensor.py --location <name_room> -w
 ```
-* Run TempSensor client program on the SecuritySystem node:
+Run TempSensor client program on the SecuritySystem node:
 ```
 cd tempsensor/
 python3 tempsensorclient.py
 ```
 
 ### LightClapper
-* Run LightClapper program on the LightClapper node:
+Run LightClapper program on the LightClapper node:
 ```
 cd lightclapper/
 python3 lightclapper.py --location <name_room> -w
 ```
-* Run LightClapper client program on the Security System node:
+Run LightClapper client program on the Security System node:
 ```
 cd lightclapper/
 python3 lightclapperclient.py
