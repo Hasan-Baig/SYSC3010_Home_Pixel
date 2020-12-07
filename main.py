@@ -18,11 +18,11 @@ tiltServoAngle = 90
 #start up pantilt servos
 servo_control = PanTilt()
 servo_control.start_servo()
+servo_control.change_pan_angle(panServoAngle)
+servo_control.change_tilt_angle(tiltServoAngle)
 
-# RUN ALL THREE NODE_CLIENTS to create three local dbs 
-# and all info should be updated on all pages
-# **** TODO ****
-# i need to exit these after shutdown since they are infinite loops
+# RUN ALL THREE NODE_CLIENTS to create three local databases 
+# ALL info should be updated on the tables of all pages
 
 #methods to access all databases
 def get_ss_db_connection():
@@ -78,32 +78,6 @@ def video_feed():
    return Response(gen(Camera()), 
                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
-# @app.route("/<servo>/<angle>")
-# def move(servo, angle):
-# 	global panServoAngle
-# 	global tiltServoAngle
-
-# 	if (servo == 'pan'):
-#         if (angle == '+'):
-#             panServoAngle = panServoAngle + 10
-#         else: 
-#             panServoAngle = panServoAngle - 10
-#         servo_control.change_pan_angle(panServoAngle) 
-	
-#     if (servo == 'tilt'):
-# 		if (angle == '+'):
-# 			tiltServoAngle = tiltServoAngle + 10
-# 		else:
-# 			tiltServoAngle = tiltServoAngle - 10
-#         servo_control.change_tilt_angle(tiltServoAngle) 
-
-# 	templateData = {
-#         'panServoAngle'	: panServoAngle,
-#         'tiltServoAngle'	: tiltServoAngle
-# 	}
-	
-#     return render_template('security.html', **templateData)
-
 @app.route("/<servo>/<angle>")
 def move(servo, angle):
 	global panServoAngle
@@ -125,7 +99,8 @@ def move(servo, angle):
       'panServoAngle'	: panServoAngle,
       'tiltServoAngle'	: tiltServoAngle
 	}
-	return render_template('index.html', **templateData)
+
+	return render_template('security.html', **templateData)
 
 # *************************************************************************************************
 
