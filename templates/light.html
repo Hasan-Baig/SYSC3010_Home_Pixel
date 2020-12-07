@@ -69,8 +69,12 @@
                             <td>{{row["date"]}}</td>
                             <td>{{row["time"]}}</td>
                             <td>{{row["location"]}}</td>
-                            <td>{{row['nodeID']}}</td>	
-                            <td>{{row['lightStatus']}}</td>	
+                            <td>{{row['nodeID']}}</td>
+                            {% if row['lightStatus'] == 1 %}
+                                <td>ON</td>
+                            {% else %}
+                                <td>OFF</td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>
