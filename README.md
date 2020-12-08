@@ -1,6 +1,10 @@
 # SYSC3010_Home_Pixel: Smart Home System 
 
-<div style="text-align: center;"><img src="static\image\logo.png" alt="Home Pixel Logo" align="middle" width="487" height="300" /></div>
+<div style="text-align: center; max-width:100%;">
+  
+  <img src="static\image\logo.png" alt="Home Pixel Logo" align="middle" width="487" height="300" />
+  
+</div>
 
 This group project uses:
 * HTML5 with Bootstrap
