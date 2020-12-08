@@ -1,12 +1,80 @@
-# SYSC3010_Home_Pixel
+# SYSC3010_Home_Pixel: Smart Home System 
 
-Group Project: Building a Smart Home System (This project uses python3)
+<img src="static\image\logo.png" alt="Home Pixel Logo" align="middle" />
+
+This group project uses:
+* HTML5 with Bootstrap
+* CSS3
+* JS with jQuery
+* Python3 
+* Bash 
+
+## Introduction
+This HomePixel smart home system monitors and controls specific home environment services that will improve one’s quality of life: **Security**, **Lighting**, and 
+**Temperature**. Having a comfortable and safe home environment has recently become very important since an unprecedented amount of people are working from home due to the 
+COVID-19 pandemic. The HomePixel system provides the services of security, lighting, and temperature because these can have a positive effect on an individual’s well-being, 
+productivity and quality of life.  
+
+## Contributors
+* Asad Waheed
+* Hasan Baig
+* Mariana Rafael-White
+
+## Hardware Required
+To operate this system in a similar fashion, you will require 3 Raspberry Pis Model 4B+, a Vonage account for SMS notifications, a smart phone which can recieve SMS, a Gmail email account, a Dropbox account and an internet connection. The additional hardware used is:
+
+* HC-SR501 passive infrared motion sensor
+* Two 5V servo motors placed in camera pan/tilt structure (used: https://shop.pimoroni.com/products/pan-tilt-hat?variant=22408353287)
+* Pi Camera module 
+* 5V Fan
+* BME280 Temperature Sensor
+* LED
+* LM393 sound detection sensor
 
 ## Environment Setup
 Run the environment script to set up the python path
 ```
 source homepixel_env.sh
 ```
+Also run the following command to update the system
+```
+sudo apt update
+``` 
+
+## Packages
+Before running the program, make sure these packages are installed on the RaspberryPi:
+```
+sudo apt-get install http.client
+sudo apt-get install python3-urllib3
+sudo apt install python3-gpiozero
+pip3 install nexmo
+sudo apt-get install rclone
+sudo apt install -y gpac
+```
+For Flask WebServer:
+```
+pip3 install flask
+pip3 install flask-wtf
+sudo apt install python3-opencv
+```
+
+## Pi Camera Module Setup
+Setting up the Pi Camera Module on the RPi
+```
+sudo raspi-config --> Interfacing Options --> Enable Camera (Yes)`--> Reboot
+```
+
+## BME280 Temperature Sensor Setup
+Setting up the BME280 Temperature Sensor on the RPi
+```
+sudo raspi-config --> Interfacing Options --> Enable I2C (Yes)
+sudo apt-get install i2c-tools python -pip
+```
+The command below checks whether the device is communicating with the RaspberryPi properly:
+```
+i2cdetect -y 1
+```
+The number printed out (Either 76 or 77) is the address of your device. You will need to set the address equal to the outputted number in the code.
 
 ## Deployment
 ### SecuritySystem
@@ -52,36 +120,6 @@ source securitysystem_tests.sh
 source lightclapper_tests.sh
 source tempsensor_tests.sh
 ```
-
-## Packages
-Before running the program, make sure these packages are installed on the RaspberryPi:
-```
-sudo apt-get install http.client
-sudo apt-get install python3-urllib3
-sudo apt install python3-gpiozero
-pip3 install nexmo
-sudo apt-get install rclone
-sudo apt install -y gpac
-```
-For Flask WebServer:
-```
-sudo apt update
-pip3 install flask
-pip3 install flask-wtf
-sudo apt install python3-opencv
-```
-
-## BME280 Temperature Sensor Setup
-Setting up the BME280 Temperature Sensor on the RPi
-```
-sudo raspi-config --> Interfacing Options --> Enable I2C (Yes)
-sudo apt-get install i2c-tools python -pip
-```
-The command below checks whether the device is communicating with the RaspberryPi properly:
-```
-i2cdetect -y 1
-```
-The number printed out (Either 76 or 77) is the address of your device. You will need to set the address equal to the outputted number in the code.
 
 ## Flask Webpage (GUI)
 
