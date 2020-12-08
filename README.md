@@ -22,6 +22,8 @@ productivity and quality of life.
 * Hasan Baig
 * Mariana Rafael-White
 
+<hr></hr>
+
 ## Hardware Required
 To operate this system in a similar fashion, you will require 3 Raspberry Pis Model 4B+, a Vonage account for SMS notifications, a smart phone which can recieve SMS, a Gmail email account, a Dropbox account and an internet connection. The additional hardware used is:
 
