@@ -55,6 +55,10 @@ pip3 install nexmo
 sudo apt-get install rclone
 sudo apt install -y gpac
 ```
+For Dropbox-Uploader:
+```
+sudo apt install git
+```
 For Flask WebServer:
 ```
 pip3 install flask
@@ -67,6 +71,25 @@ Setting up the Pi Camera Module on the RPi
 ```
 sudo raspi-config --> Interfacing Options --> Enable Camera (Yes)`--> Reboot
 ```
+
+## Dropbox-Uploader Setup
+Set up your Dropbox connnection
+* go to Dropbox Developer’s Page: https://www.dropbox.com/developers/apps and click on **Create App**
+* add the required configurations
+* in Settings scroll down to **Generated access token** and click **Generate**
+* copy this unique access token 
+
+In terminal
+```
+cd Dropbox-Uploader --> ./dropbox_uploader.sh --> Input Access Token --> Y --> Enter
+```
+
+## Phone and Email Setup
+Setting up phone number and email
+```
+cd securitysystem --> sudo nano constants.py
+```
+Change the constants **TO_NUMBER** to your personal cell number, **GMAIL_USERNAME** to your Gmail Username, and **GMAIL_PASSWORD** to your Gmail Password.
 
 ## BME280 Temperature Sensor Setup
 Setting up the BME280 Temperature Sensor on the RPi
