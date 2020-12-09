@@ -7,7 +7,7 @@
 This group project uses:
 * HTML5 with Bootstrap
 * CSS3
-* JS with jQuery
+* JavaScript with jQuery
 * Python3 
 * Bash 
 
